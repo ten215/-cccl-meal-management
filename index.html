@@ -1,1973 +1,2751 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="theme-color" content="#0f172a">
-  <title>CCCL MEAL MANAGEMENT</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>CCCL MEAL MANAGEMENT</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0
+}
 
-    body{
-      font-family:Arial,"Noto Sans Bengali",sans-serif;
-      background:#f1f5f9;
-      color:#0f172a;
-      line-height:1.5
-    }
+body{
+  font-family:Arial,"Noto Sans Bengali",sans-serif;
+  background:#f1f5f9;
+  color:#0f172a;
+  line-height:1.5
+}
 
-    button,input,textarea,select{font:inherit}
-    button{cursor:pointer;border:0}
+button,input,textarea,select{
+  font:inherit
+}
 
-    .container{
-      max-width:1100px;
-      margin:auto;
-      padding:16px
-    }
+button{
+  cursor:pointer;
+  border:0
+}
 
-    .topbar{
-      background:#0f172a;
-      color:#fff;
-      position:sticky;
-      top:0;
-      z-index:10;
-      box-shadow:0 2px 12px #0002
-    }
+.container{
+  max-width:1150px;
+  margin:auto;
+  padding:16px
+}
 
-    .nav{
-      max-width:1100px;
-      margin:auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px
-    }
+.topbar{
+  background:#0f172a;
+  color:#fff;
+  position:sticky;
+  top:0;
+  z-index:50;
+  box-shadow:0 3px 15px #0003
+}
 
-    .brand{
-      font-weight:800;
-      font-size:20px
-    }
+.nav{
+  max-width:1150px;
+  margin:auto;
+  padding:13px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px
+}
 
-    .brand small{
-      display:block;
-      font-size:11px;
-      color:#94a3b8;
-      font-weight:500
-    }
+.brand{
+  font-weight:900;
+  font-size:20px
+}
 
-    .btn{
-      padding:10px 14px;
-      border-radius:10px;
-      background:#16a34a;
-      color:white;
-      font-weight:700
-    }
+.brand small{
+  display:block;
+  color:#94a3b8;
+  font-size:11px;
+  font-weight:500
+}
 
-    .btn.secondary{
-      background:#e2e8f0;
-      color:#0f172a
-    }
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 3px 14px #0f172a12
+}
 
-    .btn.danger{
-      background:#dc2626
-    }
+.auth{
+  width:min(450px,100%)
+}
 
-    .btn:disabled{
-      opacity:.5;
-      cursor:not-allowed
-    }
+.center{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:18px
+}
 
-    .card{
-      background:white;
-      border-radius:16px;
-      padding:18px;
-      margin-bottom:16px;
-      box-shadow:0 2px 12px #0f172a12
-    }
+.logo{
+  text-align:center;
+  font-size:28px;
+  font-weight:900;
+  margin-bottom:6px
+}
 
-    h1{
-      font-size:25px;
-      margin-bottom:8px
-    }
+.muted{
+  color:#64748b
+}
 
-    h2{
-      font-size:19px;
-      margin-bottom:12px
-    }
+.small{
+  font-size:12px
+}
 
-    .muted{
-      color:#64748b;
-      font-size:14px
-    }
+h1{
+  font-size:27px;
+  margin-bottom:7px
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px
-    }
+h2{
+  font-size:21px;
+  margin-bottom:13px
+}
 
-    .grid3{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:14px
-    }
+h3{
+  font-size:17px;
+  margin-bottom:8px
+}
 
-    label{
-      display:block;
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:6px
-    }
+label{
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:6px
+}
 
-    input,textarea,select{
-      width:100%;
-      padding:11px 12px;
-      border:1px solid #cbd5e1;
-      border-radius:10px;
-      background:white;
-      outline:none
-    }
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  background:#fff;
+  outline:none
+}
 
-    input:focus,textarea:focus,select:focus{
-      border-color:#16a34a;
-      box-shadow:0 0 0 3px #16a34a18
-    }
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#16a34a;
+  box-shadow:0 0 0 3px #16a34a18
+}
 
-    textarea{
-      min-height:100px;
-      resize:vertical
-    }
+textarea{
+  min-height:100px;
+  resize:vertical
+}
 
-    .stat{
-      padding:16px;
-      border-radius:14px;
-      background:#f8fafc;
-      border:1px solid #e2e8f0
-    }
+.btn{
+  padding:11px 16px;
+  border-radius:11px;
+  background:#16a34a;
+  color:#fff;
+  font-weight:800
+}
 
-    .stat b{
-      display:block;
-      font-size:23px;
-      margin-top:4px
-    }
+.btn:hover{
+  filter:brightness(.95)
+}
 
-    .tabs{
-      display:flex;
-      gap:8px;
-      overflow:auto;
-      margin-bottom:16px
-    }
+.btn.secondary{
+  background:#e2e8f0;
+  color:#0f172a
+}
 
-    .tab{
-      white-space:nowrap;
-      padding:10px 13px;
-      border-radius:10px;
-      background:#e2e8f0;
-      color:#334155;
-      font-weight:700
-    }
+.btn.danger{
+  background:#dc2626
+}
 
-    .tab.active{
-      background:#0f172a;
-      color:#fff
-    }
+.btn.warning{
+  background:#d97706
+}
 
-    .row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      padding:12px 0;
-      border-bottom:1px solid #e2e8f0
-    }
+.btn.blue{
+  background:#2563eb
+}
 
-    .row:last-child{
-      border-bottom:0
-    }
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
 
-    .badge{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      background:#dcfce7;
-      color:#166534;
-      font-size:12px;
-      font-weight:700
-    }
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px
+}
 
-    .badge.pending{
-      background:#fef3c7;
-      color:#92400e
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:15px
+}
 
-    .badge.replied{
-      background:#dbeafe;
-      color:#1e40af
-    }
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px
+}
 
-    .notice{
-      padding:12px;
-      border-radius:10px;
-      background:#eff6ff;
-      border-left:4px solid #2563eb;
-      margin-bottom:10px
-    }
+.grid4{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px
+}
 
-    .error{
-      background:#fee2e2;
-      color:#991b1b;
-      padding:10px;
-      border-radius:10px;
-      margin:10px 0
-    }
+.stat{
+  background:#fff;
+  border-radius:16px;
+  padding:17px;
+  border:1px solid #e2e8f0;
+  box-shadow:0 2px 10px #0f172a0c
+}
 
-    .success{
-      background:#dcfce7;
-      color:#166534;
-      padding:10px;
-      border-radius:10px;
-      margin:10px 0
-    }
+.stat span{
+  color:#64748b;
+  font-size:14px
+}
 
-    .hidden{
-      display:none!important
-    }
+.stat b{
+  display:block;
+  font-size:25px;
+  margin-top:4px
+}
 
-    .center{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:18px
-    }
+.dashboard-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap
+}
 
-    .auth{
-      width:min(440px,100%)
-    }
+.menu{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin:16px 0
+}
 
-    .logo{
-      font-size:28px;
-      font-weight:900;
-      text-align:center;
-      margin-bottom:5px
-    }
+.menu button{
+  padding:14px 8px;
+  border-radius:14px;
+  background:#e2e8f0;
+  color:#334155;
+  font-weight:800;
+  border:1px solid #dbe3ec
+}
 
-    .divider{
-      height:1px;
-      background:#e2e8f0;
-      margin:18px 0
-    }
+.menu button.active{
+  background:#0f172a;
+  color:#fff
+}
 
-    .small{
-      font-size:12px
-    }
+.menu-icon{
+  display:block;
+  font-size:22px;
+  margin-bottom:3px
+}
 
-    .actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap
-    }
+.section{
+  display:none
+}
 
-    @media(max-width:700px){
-      .grid,.grid3{
-        grid-template-columns:1fr
-      }
+.section.active{
+  display:block
+}
 
-      .nav{
-        padding:12px
-      }
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:13px 0;
+  border-bottom:1px solid #e2e8f0
+}
 
-      .container{
-        padding:12px
-      }
-    }
-  </style>
+.row:last-child{
+  border-bottom:0
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#dcfce7;
+  color:#166534;
+  font-size:12px;
+  font-weight:800
+}
+
+.badge.admin{
+  background:#dbeafe;
+  color:#1d4ed8
+}
+
+.badge.pending{
+  background:#fef3c7;
+  color:#92400e
+}
+
+.badge.closed{
+  background:#fee2e2;
+  color:#991b1b
+}
+
+.notice{
+  padding:13px;
+  border-radius:12px;
+  background:#eff6ff;
+  border-left:4px solid #2563eb;
+  margin-bottom:10px
+}
+
+.success{
+  background:#dcfce7;
+  color:#166534;
+  padding:11px;
+  border-radius:11px;
+  margin:10px 0
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:11px;
+  border-radius:11px;
+  margin:10px 0
+}
+
+.hidden{
+  display:none!important
+}
+
+.table-wrap{
+  overflow-x:auto
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px
+}
+
+th,td{
+  padding:11px;
+  border-bottom:1px solid #e2e8f0;
+  text-align:left
+}
+
+th{
+  background:#f8fafc
+}
+
+.rate-box{
+  background:#0f172a;
+  color:#fff;
+  border-radius:18px;
+  padding:20px;
+  margin-top:15px
+}
+
+.rate-box .rate{
+  font-size:35px;
+  font-weight:900
+}
+
+.member-card{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:10px
+}
+
+.close-box{
+  border:2px solid #fecaca;
+  background:#fff7f7
+}
+
+@media(max-width:900px){
+  .menu{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .grid4{
+    grid-template-columns:repeat(2,1fr)
+  }
+}
+
+@media(max-width:650px){
+  .grid,
+  .grid3{
+    grid-template-columns:1fr
+  }
+
+  .menu{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .nav{
+    padding:11px
+  }
+
+  .brand{
+    font-size:17px
+  }
+
+  .container{
+    padding:11px
+  }
+
+  .card{
+    padding:15px
+  }
+
+  .menu button{
+    padding:11px 5px;
+    font-size:12px
+  }
+
+  .menu-icon{
+    font-size:20px
+  }
+
+  h1{
+    font-size:24px
+  }
+}
+</style>
 </head>
 
 <body>
 
+<!-- AUTH -->
+
 <div id="authScreen" class="center">
-  <div class="card auth">
 
-    <div class="logo">CCCL MEAL MANAGEMENT</div>
+<div class="card auth">
 
-    <p class="muted" style="text-align:center">
-      Meal • Deposit • Expense • Members • Complaints
-    </p>
+<div class="logo">
+CCCL MEAL MANAGEMENT
+</div>
 
-    <div id="authMsg"></div>
+<p class="muted" style="text-align:center">
+Meal • Deposit • Expense • Members
+</p>
 
-    <div id="loginBox">
+<div id="authMsg"></div>
 
-      <h2 style="margin-top:18px">Login</h2>
+<div id="loginBox">
 
-      <label>Email / Phone</label>
-      <input id="loginId" placeholder="Email or phone">
+<h2 style="margin-top:18px">
+Login
+</h2>
 
-      <label style="margin-top:10px">Password</label>
-      <input id="loginPass" type="password" placeholder="Password">
+<label>Email</label>
+<input id="loginId" type="email" placeholder="name@example.com">
 
-      <button
-        class="btn"
-        style="width:100%;margin-top:14px"
-        onclick="login()">
-        Login
-      </button>
+<label style="margin-top:10px">
+Password
+</label>
+<input id="loginPass" type="password" placeholder="Password">
 
-      <button
-        class="btn secondary"
-        style="width:100%;margin-top:8px"
-        onclick="showSignup()">
-        Create account
-      </button>
+<button
+class="btn"
+style="width:100%;margin-top:14px"
+onclick="login()">
+Login
+</button>
 
-    </div>
+<button
+class="btn secondary"
+style="width:100%;margin-top:8px"
+onclick="showSignup()">
+Create account
+</button>
 
-    <div id="signupBox" class="hidden">
-
-      <h2 style="margin-top:18px">Create account</h2>
-
-      <label>Name</label>
-      <input id="signupName" placeholder="Full name">
-
-      <label style="margin-top:10px">Phone</label>
-      <input id="signupPhone" placeholder="01XXXXXXXXX">
-
-      <label style="margin-top:10px">Email</label>
-      <input
-        id="signupEmail"
-        type="email"
-        placeholder="name@example.com">
-
-      <label style="margin-top:10px">Password</label>
-      <input
-        id="signupPass"
-        type="password"
-        placeholder="Minimum 6 characters">
-
-      <button
-        class="btn"
-        style="width:100%;margin-top:14px"
-        onclick="signup()">
-        Create account
-      </button>
-
-      <button
-        class="btn secondary"
-        style="width:100%;margin-top:8px"
-        onclick="showLogin()">
-        Back to login
-      </button>
-
-      <p class="muted small" style="margin-top:10px">
-        Phone login requires Phone Auth to be enabled in Supabase.
-      </p>
-
-    </div>
-
-  </div>
 </div>
 
 
+<div id="signupBox" class="hidden">
+
+<h2 style="margin-top:18px">
+Create account
+</h2>
+
+<label>Name</label>
+<input id="signupName" placeholder="Full name">
+
+<label style="margin-top:10px">
+Phone
+</label>
+<input id="signupPhone" placeholder="01XXXXXXXXX">
+
+<label style="margin-top:10px">
+Email
+</label>
+<input id="signupEmail" type="email" placeholder="name@example.com">
+
+<label style="margin-top:10px">
+Password
+</label>
+<input id="signupPass" type="password" placeholder="Minimum 6 characters">
+
+<button
+class="btn"
+style="width:100%;margin-top:14px"
+onclick="signup()">
+Create account
+</button>
+
+<button
+class="btn secondary"
+style="width:100%;margin-top:8px"
+onclick="showLogin()">
+Back to login
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- APP -->
+
 <div id="app" class="hidden">
 
-  <div class="topbar">
+<div class="topbar">
 
-    <div class="nav">
+<div class="nav">
 
-      <div class="brand">
-        CCCL MEAL MANAGEMENT
-        <small id="userLine"></small>
-      </div>
+<div class="brand">
+CCCL MEAL MANAGEMENT
+<small id="userLine"></small>
+</div>
 
-      <button class="btn danger" onclick="logout()">
-        Logout
-      </button>
+<button
+class="btn danger"
+onclick="logout()">
+Logout
+</button>
 
-    </div>
+</div>
 
-  </div>
+</div>
 
 
-  <main class="container">
+<main class="container">
 
-    <div id="appMsg"></div>
+<div id="appMsg"></div>
 
 
-    <div id="noMess" class="card hidden">
+<!-- NO MESS -->
 
-      <h1>Welcome 👋</h1>
+<div id="noMess" class="card hidden">
 
-      <p class="muted">
-        প্রথমে একটি মেস তৈরি করো অথবা Mess Code দিয়ে কোনো মেসে Join করো।
-      </p>
+<h1>
+Welcome 👋
+</h1>
 
+<p class="muted">
+প্রথমে একটি মেস তৈরি করো অথবা Mess Code দিয়ে কোনো মেসে Join করো।
+</p>
 
-      <div class="grid" style="margin-top:15px">
+<div class="grid" style="margin-top:18px">
 
-        <div>
+<div>
 
-          <h2>Create Mess</h2>
+<h2>Create Mess</h2>
 
-          <input
-            id="newMessName"
-            placeholder="Mess name">
+<input
+id="newMessName"
+placeholder="Mess name">
 
-          <button
-            class="btn"
-            style="margin-top:9px"
-            onclick="createMess()">
-            Create Mess
-          </button>
+<button
+class="btn"
+style="margin-top:10px"
+onclick="createMess()">
+Create Mess
+</button>
 
-        </div>
+</div>
 
 
-        <div>
+<div>
 
-          <h2>Join Mess</h2>
+<h2>Join Mess</h2>
 
-          <input
-            id="joinCode"
-            placeholder="Mess Code">
+<input
+id="joinCode"
+placeholder="Mess Code">
 
-          <button
-            class="btn"
-            style="margin-top:9px"
-            onclick="joinMess()">
-            Join Mess
-          </button>
+<button
+class="btn"
+style="margin-top:10px"
+onclick="joinMess()">
+Join Mess
+</button>
 
-        </div>
+</div>
 
-      </div>
+</div>
 
-    </div>
+</div>
 
 
-    <div id="dashboard" class="hidden">
+<!-- DASHBOARD -->
 
-      <div class="card">
+<div id="dashboard" class="hidden">
 
-        <h1 id="messTitle">Mess</h1>
 
-        <p class="muted">
-          Mess Code:
-          <b id="messCode"></b>
-        </p>
+<div class="card">
 
-      </div>
+<div class="dashboard-title">
 
+<div>
 
-      <div class="tabs">
+<h1 id="messTitle">
+Mess
+</h1>
 
-        <button
-          class="tab active"
-          onclick="tab('home',this)">
-          Dashboard
-        </button>
+<p class="muted">
+Mess Code:
+<b id="messCode"></b>
+</p>
 
-        <button
-          class="tab"
-          onclick="tab('meals',this)">
-          Meals
-        </button>
+<p style="margin-top:5px">
+<span id="messStatus" class="badge">
+Active
+</span>
+</p>
 
-        <button
-          class="tab"
-          onclick="tab('money',this)">
-          Money
-        </button>
+</div>
 
-        <button
-          class="tab"
-          onclick="tab('members',this)">
-          Members
-        </button>
+<div id="adminTopActions"></div>
 
-        <button
-          class="tab"
-          onclick="tab('complaints',this)">
-          অভিযোগ
-        </button>
+</div>
 
-        <button
-          class="tab"
-          onclick="tab('notices',this)">
-          Notice
-        </button>
+</div>
 
-      </div>
 
+<!-- MENU -->
 
-      <section id="homeTab">
+<div class="menu">
 
-        <div class="grid3">
+<button class="active" onclick="openSection('home',this)">
+<span class="menu-icon">🏠</span>
+Dashboard
+</button>
 
-          <div class="stat">
-            <span class="muted">Total Meals</span>
-            <b id="sMeals">0</b>
-          </div>
+<button onclick="openSection('meals',this)">
+<span class="menu-icon">🍚</span>
+Meals
+</button>
 
-          <div class="stat">
-            <span class="muted">Total Deposit</span>
-            <b id="sDeposit">৳0</b>
-          </div>
+<button onclick="openSection('money',this)">
+<span class="menu-icon">💰</span>
+Money
+</button>
 
-          <div class="stat">
-            <span class="muted">Total Expense</span>
-            <b id="sExpense">৳0</b>
-          </div>
+<button onclick="openSection('members',this)">
+<span class="menu-icon">👥</span>
+Members
+</button>
 
-        </div>
+<button onclick="openSection('reports',this)">
+<span class="menu-icon">📊</span>
+Reports
+</button>
 
+<button onclick="openSection('notices',this)">
+<span class="menu-icon">📢</span>
+Notice
+</button>
 
-        <div
-          class="card"
-          style="margin-top:14px">
+<button onclick="openSection('notifications',this)">
+<span class="menu-icon">🔔</span>
+Notifications
+</button>
 
-          <h2>Current Meal Rate</h2>
+<button onclick="openSection('notes',this)">
+<span class="menu-icon">📝</span>
+Notes
+</button>
 
-          <div
-            style="font-size:32px;font-weight:900"
-            id="mealRate">
-            ৳0.00
-          </div>
+<button onclick="openSection('complaints',this)">
+<span class="menu-icon">⚠️</span>
+Complaints
+</button>
 
-          <p class="muted">
-            Meal Rate = Total Expense ÷ Total Meals
-          </p>
+<button onclick="openSection('close',this)">
+<span class="menu-icon">🔒</span>
+Close Mess
+</button>
 
-        </div>
+</div>
 
-      </section>
 
+<!-- HOME -->
 
-      <section id="mealsTab" class="hidden">
+<section id="homeSection" class="section active">
 
-        <div class="card">
+<div class="grid4">
 
-          <h2>আজকের Meal</h2>
+<div class="stat">
+<span>Total Members</span>
+<b id="sMembers">0</b>
+</div>
 
-          <div class="grid">
+<div class="stat">
+<span>Total Meals</span>
+<b id="sMeals">0</b>
+</div>
 
-            <div>
-              <label>Date</label>
-              <input id="mealDate" type="date">
-            </div>
+<div class="stat">
+<span>Total Deposit</span>
+<b id="sDeposit">৳0</b>
+</div>
 
-            <div>
-              <label>Meal</label>
-              <input
-                id="mealCount"
-                type="number"
-                min="0"
-                step="0.5"
-                value="1">
-            </div>
+<div class="stat">
+<span>Total Expense</span>
+<b id="sExpense">৳0</b>
+</div>
 
-          </div>
+</div>
 
-          <button
-            class="btn"
-            style="margin-top:12px"
-            onclick="saveMeal()">
-            Save Meal
-          </button>
 
-        </div>
+<div class="rate-box">
 
+<div class="muted" style="color:#cbd5e1">
+Current Meal Rate
+</div>
 
-        <div class="card">
+<div class="rate" id="mealRate">
+৳0.00
+</div>
 
-          <h2>Recent Meals</h2>
+<p style="color:#cbd5e1">
+Total Expense ÷ Total Meals
+</p>
 
-          <div id="mealList"></div>
+</div>
 
-        </div>
 
-      </section>
+<div class="grid" style="margin-top:15px">
 
+<div class="card">
 
-      <section id="moneyTab" class="hidden">
+<h2>
+💵 Current Balance
+</h2>
 
-        <div class="grid">
+<div
+style="font-size:30px;font-weight:900"
+id="currentBalance">
+৳0.00
+</div>
 
-          <div class="card">
+<p class="muted">
+Deposit − Expense
+</p>
 
-            <h2>Add Deposit</h2>
+</div>
 
-            <input
-              id="depositAmount"
-              type="number"
-              min="0"
-              placeholder="Amount">
 
-            <input
-              id="depositDate"
-              type="date"
-              style="margin-top:8px">
+<div class="card">
 
-            <input
-              id="depositNote"
-              placeholder="Note"
-              style="margin-top:8px">
+<h2>
+🍚 Meal Summary
+</h2>
 
-            <button
-              class="btn"
-              style="margin-top:10px"
-              onclick="saveDeposit()">
-              Save Deposit
-            </button>
+<div id="homeMealSummary">
+কোনো তথ্য নেই।
+</div>
 
-          </div>
+</div>
 
+</div>
 
-          <div class="card">
+</section>
 
-            <h2>Add Expense</h2>
 
-            <input
-              id="expenseTitle"
-              placeholder="Expense title">
+<!-- MEALS -->
 
-            <input
-              id="expenseAmount"
-              type="number"
-              min="0"
-              placeholder="Amount"
-              style="margin-top:8px">
+<section id="mealsSection" class="section">
 
-            <input
-              id="expenseDate"
-              type="date"
-              style="margin-top:8px">
+<div class="card">
 
-            <input
-              id="expenseNote"
-              placeholder="Note"
-              style="margin-top:8px">
+<h2>
+🍚 Meal Entry
+</h2>
 
-            <button
-              class="btn"
-              style="margin-top:10px"
-              onclick="saveExpense()">
-              Save Expense
-            </button>
+<div class="grid">
 
-          </div>
+<div>
 
-        </div>
+<label>Member</label>
 
+<select id="mealMember"></select>
 
-        <div class="card">
+</div>
 
-          <h2>Recent Transactions</h2>
+<div>
 
-          <div id="moneyList"></div>
+<label>Date</label>
 
-        </div>
+<input id="mealDate" type="date">
 
-      </section>
+</div>
 
+</div>
 
-      <section id="membersTab" class="hidden">
 
-        <div class="card">
+<div style="margin-top:10px">
 
-          <h2>সব সদস্য</h2>
+<label>Meal</label>
 
-          <div id="memberList"></div>
+<input
+id="mealCount"
+type="number"
+min="0"
+step="0.5"
+value="1">
 
-        </div>
+</div>
 
-      </section>
 
+<button
+class="btn"
+style="margin-top:12px"
+onclick="saveMeal()">
+Save Meal
+</button>
 
-      <section id="complaintsTab" class="hidden">
+</div>
 
-        <div class="card">
 
-          <h2>অভিযোগ / Feedback</h2>
+<div class="card">
 
-          <input
-            id="complaintSubject"
-            placeholder="বিষয়">
+<h2>
+📋 Recent Meals
+</h2>
 
-          <textarea
-            id="complaintMessage"
-            placeholder="অভিযোগ বা মতামত লিখুন"
-            style="margin-top:8px"></textarea>
+<div id="mealList"></div>
 
-          <button
-            class="btn"
-            style="margin-top:10px"
-            onclick="sendComplaint()">
-            Submit
-          </button>
+</div>
 
-        </div>
+</section>
 
 
-        <div class="card">
+<!-- MONEY -->
 
-          <h2>আমার অভিযোগ</h2>
+<section id="moneySection" class="section">
 
-          <div id="complaintList"></div>
+<div class="grid">
 
-        </div>
+<div class="card">
 
-      </section>
+<h2>
+💰 Add Deposit
+</h2>
 
+<label>Member</label>
+<select id="depositMember"></select>
 
-      <section id="noticesTab" class="hidden">
+<label style="margin-top:9px">
+Amount
+</label>
 
-        <div class="card">
+<input
+id="depositAmount"
+type="number"
+min="0"
+placeholder="Amount">
 
-          <h2>Notice & Notifications</h2>
+<label style="margin-top:9px">
+Date
+</label>
 
-          <div id="noticeList"></div>
+<input id="depositDate" type="date">
 
-        </div>
+<label style="margin-top:9px">
+Note
+</label>
 
-      </section>
+<input id="depositNote" placeholder="Note">
 
-    </div>
+<button
+class="btn"
+style="margin-top:11px"
+onclick="saveDeposit()">
+Save Deposit
+</button>
 
-  </main>
+</div>
+
+
+<div class="card">
+
+<h2>
+🧾 Add Expense
+</h2>
+
+<label>Title</label>
+
+<input
+id="expenseTitle"
+placeholder="Expense title">
+
+<label style="margin-top:9px">
+Amount
+</label>
+
+<input
+id="expenseAmount"
+type="number"
+min="0"
+placeholder="Amount">
+
+<label style="margin-top:9px">
+Date
+</label>
+
+<input id="expenseDate" type="date">
+
+<label style="margin-top:9px">
+Note
+</label>
+
+<input id="expenseNote" placeholder="Note">
+
+<button
+class="btn"
+style="margin-top:11px"
+onclick="saveExpense()">
+Save Expense
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+📋 Recent Transactions
+</h2>
+
+<div id="moneyList"></div>
+
+</div>
+
+</section>
+
+
+<!-- MEMBERS -->
+
+<section id="membersSection" class="section">
+
+<div id="memberAdminBox"></div>
+
+<div class="card">
+
+<h2>
+👥 সব সদস্য
+</h2>
+
+<div id="memberList"></div>
+
+</div>
+
+</section>
+
+
+<!-- REPORTS -->
+
+<section id="reportsSection" class="section">
+
+<div class="card">
+
+<div class="dashboard-title">
+
+<h2>
+📊 Full Report
+</h2>
+
+<button
+class="btn blue"
+onclick="window.print()">
+🖨️ Print
+</button>
+
+</div>
+
+<div class="grid3">
+
+<div class="stat">
+<span>Total Meal</span>
+<b id="rMeals">0</b>
+</div>
+
+<div class="stat">
+<span>Total Deposit</span>
+<b id="rDeposit">৳0</b>
+</div>
+
+<div class="stat">
+<span>Total Expense</span>
+<b id="rExpense">৳0</b>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+👤 Member-wise Report
+</h2>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Member</th>
+<th>Meal</th>
+<th>Deposit</th>
+<th>Meal Cost</th>
+<th>Balance</th>
+</tr>
+
+</thead>
+
+<tbody id="reportTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- NOTICE -->
+
+<section id="noticesSection" class="section">
+
+<div id="noticeAdminBox"></div>
+
+<div class="card">
+
+<h2>
+📢 Notice
+</h2>
+
+<div id="noticeList"></div>
+
+</div>
+
+</section>
+
+
+<!-- NOTIFICATIONS -->
+
+<section id="notificationsSection" class="section">
+
+<div class="card">
+
+<h2>
+🔔 Notifications
+</h2>
+
+<div id="notificationList"></div>
+
+</div>
+
+</section>
+
+
+<!-- NOTES -->
+
+<section id="notesSection" class="section">
+
+<div id="noteAdminBox"></div>
+
+<div class="card">
+
+<h2>
+📝 Notes
+</h2>
+
+<div id="noteList"></div>
+
+</div>
+
+</section>
+
+
+<!-- COMPLAINTS -->
+
+<section id="complaintsSection" class="section">
+
+<div class="card">
+
+<h2>
+⚠️ অভিযোগ / Feedback
+</h2>
+
+<input
+id="complaintSubject"
+placeholder="বিষয়">
+
+<textarea
+id="complaintMessage"
+placeholder="অভিযোগ বা মতামত লিখুন"
+style="margin-top:9px">
+</textarea>
+
+<button
+class="btn"
+style="margin-top:10px"
+onclick="sendComplaint()">
+Submit
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+আমার অভিযোগ
+</h2>
+
+<div id="complaintList"></div>
+
+</div>
+
+</section>
+
+
+<!-- CLOSE -->
+
+<section id="closeSection" class="section">
+
+<div class="card close-box">
+
+<h2>
+🔒 Mess Close / Archive
+</h2>
+
+<p class="muted">
+মেস বন্ধ করলে নতুন Meal, Deposit ও Expense দেওয়া বন্ধ করা যাবে। Final Report সংরক্ষিত থাকবে।
+</p>
+
+<div
+style="margin-top:15px"
+id="closeReport">
+Loading...
+</div>
+
+<div id="closeActionBox" style="margin-top:15px"></div>
+
+</div>
+
+</section>
+
+
+</div>
+
+</main>
 
 </div>
 
 
 <script>
 
-  const SUPABASE_URL =
-    "https://nqfxmdzqtqilegbkurvq.supabase.co";
+const SUPABASE_URL =
+"https://nqfxmdzqtqilegbkurvq.supabase.co";
 
-  const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_SCzoBQ4vrmNO6mH99uq-mA_M12pvfjq";
+const SUPABASE_PUBLISHABLE_KEY =
+"sb_publishable_SCzoBQ4vrmNO6mH99uq-mA_M12pvfjq";
 
+const {createClient}=supabase;
 
-  const { createClient } = supabase;
+const db=createClient(
+SUPABASE_URL,
+SUPABASE_PUBLISHABLE_KEY
+);
 
-  const db = createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+let user=null;
+let member=null;
+let mess=null;
+let members=[];
+let meals=[];
+let deposits=[];
+let expenses=[];
 
+const $=id=>document.getElementById(id);
 
-  let user = null;
-  let member = null;
-  let mess = null;
+function today(){
+return new Date().toISOString().slice(0,10);
+}
 
+$("mealDate").value=today();
+$("depositDate").value=today();
+$("expenseDate").value=today();
 
-  const $ = id => document.getElementById(id);
 
-  const today = () =>
-    new Date().toISOString().slice(0,10);
+function msg(text,ok=false,target="appMsg"){
 
+$(target).innerHTML=
+`<div class="${ok?'success':'error'}">${escapeHtml(text)}</div>`;
 
-  $("mealDate").value = today();
-  $("depositDate").value = today();
-  $("expenseDate").value = today();
+setTimeout(()=>{
+$(target).innerHTML="";
+},4000);
 
+}
 
-  function msg(
-    text,
-    ok=false,
-    target="appMsg"
-  ){
 
-    $(target).innerHTML =
-      `<div class="${ok?'success':'error'}">${text}</div>`;
+function showSignup(){
 
-    setTimeout(
-      () => $(target).innerHTML="",
-      4000
-    );
+$("loginBox").classList.add("hidden");
+$("signupBox").classList.remove("hidden");
 
-  }
+}
 
 
-  function showSignup(){
+function showLogin(){
 
-    $("loginBox").classList.add("hidden");
+$("signupBox").classList.add("hidden");
+$("loginBox").classList.remove("hidden");
 
-    $("signupBox").classList.remove("hidden");
+}
 
-  }
 
+async function signup(){
 
-  function showLogin(){
+const name=$("signupName").value.trim();
+const phone=$("signupPhone").value.trim();
+const email=$("signupEmail").value.trim();
+const password=$("signupPass").value;
 
-    $("signupBox").classList.add("hidden");
+if(!name||!password||!email){
 
-    $("loginBox").classList.remove("hidden");
+return msg(
+"Name, Email এবং Password দিন।",
+false,
+"authMsg"
+);
 
-  }
+}
 
+if(password.length<6){
 
-  async function signup(){
+return msg(
+"Password কমপক্ষে 6 characters হতে হবে।",
+false,
+"authMsg"
+);
 
-    const name =
-      $("signupName").value.trim();
+}
 
-    const phone =
-      $("signupPhone").value.trim();
+const {data,error}=await db.auth.signUp({
 
-    const email =
-      $("signupEmail").value.trim();
+email,
+password,
 
-    const pass =
-      $("signupPass").value;
+options:{
+data:{
+name,
+phone
+}
+}
 
+});
 
-    if(
-      !name ||
-      !pass ||
-      (!email && !phone)
-    ){
+if(error){
 
-      return msg(
-        "নাম, password এবং email/phone দিন।",
-        false,
-        "authMsg"
-      );
+return msg(
+error.message,
+false,
+"authMsg"
+);
 
-    }
+}
 
+if(data.user){
 
-    const payload = {
+msg(
+"Account তৈরি হয়েছে। এখন Login করুন।",
+true,
+"authMsg"
+);
 
-      password:pass,
+showLogin();
 
-      options:{
-        data:{
-          name,
-          phone
-        }
-      }
+}
 
-    };
+}
 
 
-    if(email)
-      payload.email = email;
-    else
-      payload.phone = phone;
+async function login(){
 
+const email=$("loginId").value.trim();
+const password=$("loginPass").value;
 
-    const {
-      data,
-      error
-    } = await db.auth.signUp(payload);
+if(!email||!password){
 
+return msg(
+"Email এবং Password দিন।",
+false,
+"authMsg"
+);
 
-    if(error){
+}
 
-      return msg(
-        error.message,
-        false,
-        "authMsg"
-      );
+const {error}=await db.auth.signInWithPassword({
+email,
+password
+});
 
-    }
+if(error){
 
+return msg(
+error.message,
+false,
+"authMsg"
+);
 
-    if(data.user){
+}
 
-      msg(
-        "Account তৈরি হয়েছে। এখন Login করুন।",
-        true,
-        "authMsg"
-      );
+await init();
 
-      showLogin();
+}
 
-    }
 
-  }
+async function logout(){
 
+await db.auth.signOut();
 
-  async function login(){
+location.reload();
 
-    const id =
-      $("loginId").value.trim();
+}
 
-    const password =
-      $("loginPass").value;
 
+async function init(){
 
-    if(!id || !password){
+const {data}=await db.auth.getUser();
 
-      return msg(
-        "Login তথ্য দিন।",
-        false,
-        "authMsg"
-      );
+user=data.user;
 
-    }
+if(!user){
 
+$("authScreen").classList.remove("hidden");
+$("app").classList.add("hidden");
 
-    const body =
-      id.includes("@")
-      ? {
-          email:id,
-          password
-        }
-      : {
-          phone:id,
-          password
-        };
+return;
 
+}
 
-    const {error} =
-      await db.auth.signInWithPassword(body);
+$("authScreen").classList.add("hidden");
+$("app").classList.remove("hidden");
 
+$("userLine").textContent=
+user.email||user.phone||"";
 
-    if(error){
+await loadMember();
 
-      return msg(
-        error.message,
-        false,
-        "authMsg"
-      );
+}
 
-    }
 
+async function loadMember(){
 
-    await init();
+let q=await db
+.from("members")
+.select("*")
+.eq("user_id",user.id)
+.maybeSingle();
 
-  }
+if(!q.data){
 
+q=await db
+.from("members")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
 
-  async function logout(){
+if(q.data&&!q.data.user_id){
 
-    await db.auth.signOut();
+await db
+.from("members")
+.update({
+user_id:user.id
+})
+.eq("id",user.id);
 
-    location.reload();
+q.data.user_id=user.id;
 
-  }
+}
 
+}
 
-  async function init(){
+if(q.error){
 
-    const {
-      data
-    } = await db.auth.getUser();
+console.warn(q.error);
 
+}
 
-    user = data.user;
+member=q.data;
 
+if(!member){
 
-    if(!user){
+$("noMess").classList.remove("hidden");
+$("dashboard").classList.add("hidden");
 
-      $("authScreen")
-        .classList
-        .remove("hidden");
+return;
 
-      $("app")
-        .classList
-        .add("hidden");
+}
 
-      return;
+if(member.mess_id){
 
-    }
+await loadMess();
 
+}else{
 
-    $("authScreen")
-      .classList
-      .add("hidden");
+$("noMess").classList.remove("hidden");
+$("dashboard").classList.add("hidden");
 
-    $("app")
-      .classList
-      .remove("hidden");
+}
 
+}
 
-    $("userLine").textContent =
-      user.email ||
-      user.phone ||
-      "";
 
+async function createMess(){
 
-    await loadMember();
+const name=$("newMessName").value.trim();
 
-  }
+if(!name)
+return msg("Mess name দিন।");
 
+const code=(
+"CCCL-"+
+Math.random().toString(36).slice(2,7)
+).toUpperCase();
 
-  async function loadMember(){
+const {data,error}=await db
+.from("messes")
+.insert({
+name,
+mess_code:code,
+owner_id:user.id,
+status:"active"
+})
+.select()
+.single();
 
-    const q =
-      await db
-        .from("members")
-        .select("*")
-        .eq("id",user.id)
-        .maybeSingle();
+if(error)
+return msg(error.message);
 
+const {error:memberError}=await db
+.from("members")
+.insert({
 
-    if(q.error){
+id:user.id,
+user_id:user.id,
+mess_id:data.id,
 
-      console.warn(q.error);
+name:
+user.user_metadata?.name||
+user.email||
+"Admin",
 
-      return msg(
-        q.error.message
-      );
+phone:
+user.user_metadata?.phone||
+null,
 
-    }
+role:"admin",
+active:true
 
+});
 
-    member = q.data;
+if(memberError)
+return msg(memberError.message);
 
+await loadMember();
 
-    if(!member){
+}
 
-      $("noMess")
-        .classList
-        .remove("hidden");
 
-      $("dashboard")
-        .classList
-        .add("hidden");
+async function joinMess(){
 
-      return;
+const code=$("joinCode").value.trim().toUpperCase();
 
-    }
+if(!code)
+return msg("Mess Code দিন।");
 
+const {data,error}=await db
+.from("messes")
+.select("*")
+.eq("mess_code",code)
+.maybeSingle();
 
-    if(member.mess_id){
+if(error)
+return msg(error.message);
 
-      await loadMess();
+if(!data)
+return msg("এই Mess Code পাওয়া যায়নি।");
 
-    }else{
+if(member){
 
-      $("noMess")
-        .classList
-        .remove("hidden");
+const {error:e}=await db
+.from("members")
+.update({
+mess_id:data.id,
+role:"member",
+user_id:user.id
+})
+.eq("id",member.id);
 
-      $("dashboard")
-        .classList
-        .add("hidden");
+if(e)
+return msg(e.message);
 
-    }
+}else{
 
-  }
+const {error:e}=await db
+.from("members")
+.insert({
 
+id:user.id,
+user_id:user.id,
+mess_id:data.id,
 
-  async function createMess(){
+name:
+user.user_metadata?.name||
+user.email||
+"Member",
 
-    const name =
-      $("newMessName").value.trim();
+phone:
+user.user_metadata?.phone||
+null,
 
+role:"member",
+active:true
 
-    if(!name)
-      return msg("Mess name দিন。");
+});
 
+if(e)
+return msg(e.message);
 
-    const code =
-      (
-        "CCCL-" +
-        Math.random()
-          .toString(36)
-          .slice(2,7)
-      ).toUpperCase();
+}
 
+await loadMember();
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("messes")
-        .insert({
-          name,
-          mess_code:code,
-          owner_id:user.id
-        })
-        .select()
-        .single();
+}
 
 
-    if(error)
-      return msg(error.message);
+async function loadMess(){
 
+const {data,error}=await db
+.from("messes")
+.select("*")
+.eq("id",member.mess_id)
+.single();
 
-    const {
-      error:memberError
-    } =
-      await db
-        .from("members")
-        .insert({
+if(error)
+return msg(error.message);
 
-          id:user.id,
+mess=data;
 
-          mess_id:data.id,
+$("noMess").classList.add("hidden");
+$("dashboard").classList.remove("hidden");
 
-          name:
-            user.user_metadata?.name ||
-            user.email ||
-            "Admin",
+$("messTitle").textContent=mess.name;
+$("messCode").textContent=mess.mess_code;
 
-          phone:
-            user.user_metadata?.phone ||
-            user.phone ||
-            null,
+if(mess.status==="closed"){
 
-          role:"admin",
+$("messStatus").textContent="Closed";
+$("messStatus").className="badge closed";
 
-          active:true
+}else{
 
-        });
+$("messStatus").textContent="Active";
+$("messStatus").className="badge";
 
+}
 
-    if(memberError)
-      return msg(memberError.message);
+const admin=member.role==="admin";
 
+$("adminTopActions").innerHTML=admin
+?`<span class="badge admin">ADMIN</span>`
+:"";
 
-    await loadMember();
+await refreshAll();
 
-  }
+}
 
 
-  async function joinMess(){
+async function refreshAll(){
 
-    const code =
-      $("joinCode")
-        .value
-        .trim()
-        .toUpperCase();
+await loadMembers();
+await loadMeals();
+await loadMoney();
+await loadStats();
+await loadReports();
+await loadNotices();
+await loadNotifications();
+await loadNotes();
+await loadComplaints();
+await loadClose();
 
+}
 
-    if(!code)
-      return msg("Mess Code দিন।");
 
+async function loadMembers(){
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("messes")
-        .select("*")
-        .eq("mess_code",code)
-        .maybeSingle();
+const {data,error}=await db
+.from("members")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("name");
 
+if(error){
 
-    if(error)
-      return msg(error.message);
+console.warn(error);
+return;
 
+}
 
-    if(!data)
-      return msg("এই Mess Code পাওয়া যায়নি।");
+members=data||[];
 
+$("sMembers").textContent=members.length;
 
-    if(!member){
+fillMemberSelects();
 
-      const {
-        error:insError
-      } =
-        await db
-          .from("members")
-          .insert({
+const admin=member.role==="admin";
 
-            id:user.id,
+if(admin){
 
-            mess_id:data.id,
+$("memberAdminBox").innerHTML=`
 
-            name:
-              user.user_metadata?.name ||
-              "Member",
+<div class="card">
 
-            phone:
-              user.user_metadata?.phone ||
-              user.phone ||
-              null,
+<h2>➕ নতুন সদস্য যোগ করুন</h2>
 
-            role:"member",
+<div class="grid">
 
-            active:true
+<div>
+<label>নাম</label>
+<input id="addMemberName" placeholder="সদস্যের নাম">
+</div>
 
-          });
+<div>
+<label>পরিচয় / পদবি</label>
+<input id="addMemberIdentity" placeholder="যেমন: Student / Manager">
+</div>
 
+<div>
+<label>Phone</label>
+<input id="addMemberPhone" placeholder="01XXXXXXXXX">
+</div>
 
-      if(insError)
-        return msg(insError.message);
+<div>
+<label>Role</label>
+<select id="addMemberRole">
+<option value="member">Member</option>
+<option value="viewer">Viewer</option>
+</select>
+</div>
 
-    }else{
+</div>
 
-      const {
-        error:upError
-      } =
-        await db
-          .from("members")
-          .update({
-            mess_id:data.id,
-            role:"member"
-          })
-          .eq("id",user.id);
+<button
+class="btn"
+style="margin-top:12px"
+onclick="addMember()">
+Add Member
+</button>
 
+</div>
 
-      if(upError)
-        return msg(upError.message);
+`;
 
-    }
+}else{
 
+$("memberAdminBox").innerHTML="";
 
-    await loadMember();
+}
 
-  }
+$("memberList").innerHTML=
+members.map(x=>`
 
+<div class="member-card">
 
-  async function loadMess(){
+<div class="row">
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("messes")
-        .select("*")
-        .eq("id",member.mess_id)
-        .single();
+<div>
 
+<b>${escapeHtml(x.name||"Unnamed")}</b>
 
-    if(error)
-      return msg(error.message);
+<div class="muted small">
+${escapeHtml(x.identity||"পরিচয় নেই")}
+</div>
 
+<div class="muted small">
+${escapeHtml(x.phone||"Phone নেই")}
+</div>
 
-    mess = data;
+</div>
 
+<div>
 
-    $("noMess")
-      .classList
-      .add("hidden");
+<span class="badge ${
+x.role==="admin"?"admin":""
+}">
+${escapeHtml(x.role||"member")}
+</span>
 
+</div>
 
-    $("dashboard")
-      .classList
-      .remove("hidden");
+</div>
 
+</div>
 
-    $("messTitle").textContent =
-      mess.name;
+`).join("")
+||'<p class="muted">কোনো সদস্য নেই।</p>';
 
+}
 
-    $("messCode").textContent =
-      mess.mess_code;
 
+function fillMemberSelects(){
 
-    await refreshAll();
+const options=members
+.map(x=>`
+<option value="${x.id}">
+${escapeHtml(x.name||"Unnamed")}
+</option>
+`)
+.join("");
 
-  }
+$("mealMember").innerHTML=options;
+$("depositMember").innerHTML=options;
 
+if(member){
 
-  async function refreshAll(){
+$("mealMember").value=member.id;
+$("depositMember").value=member.id;
 
-    await Promise.all([
+}
 
-      loadStats(),
+}
 
-      loadMeals(),
 
-      loadMoney(),
+async function addMember(){
 
-      loadMembers(),
+if(member.role!=="admin")
+return msg("শুধু Admin সদস্য যোগ করতে পারবে।");
 
-      loadComplaints(),
+const name=$("addMemberName").value.trim();
+const identity=$("addMemberIdentity").value.trim();
+const phone=$("addMemberPhone").value.trim();
+const role=$("addMemberRole").value;
 
-      loadNotices()
+if(!name)
+return msg("সদস্যের নাম দিন।");
 
-    ]);
+const {error}=await db
+.from("members")
+.insert({
 
-  }
+mess_id:member.mess_id,
+name,
+identity,
+phone,
+role,
+active:true
 
+});
 
-  async function loadStats(){
+if(error)
+return msg(error.message);
 
-    const [
-      m,
-      d,
-      e
-    ] =
-      await Promise.all([
+msg("নতুন সদস্য যোগ হয়েছে।",true);
 
-        db
-          .from("meals")
-          .select("meal"),
+$("addMemberName").value="";
+$("addMemberIdentity").value="";
+$("addMemberPhone").value="";
 
-        db
-          .from("deposits")
-          .select("amount"),
+await loadMembers();
 
-        db
-          .from("expenses")
-          .select("amount")
+}
 
-      ]);
 
+async function loadMeals(){
 
-    const meals =
-      (m.data || [])
-        .reduce(
-          (s,x) =>
-            s + Number(x.meal || 0),
-          0
-        );
+const {data,error}=await db
+.from("meals")
+.select("*,members(name)")
+.eq(
+"members.mess_id",
+member.mess_id
+)
+.order("meal_date",{ascending:false})
+.limit(100);
 
+if(error){
 
-    const deposits =
-      (d.data || [])
-        .reduce(
-          (s,x) =>
-            s + Number(x.amount || 0),
-          0
-        );
+console.warn(error);
+return;
 
+}
 
-    const expenses =
-      (e.data || [])
-        .reduce(
-          (s,x) =>
-            s + Number(x.amount || 0),
-          0
-        );
+meals=data||[];
 
+$("mealList").innerHTML=
+meals.map(x=>`
 
-    $("sMeals").textContent =
-      meals;
+<div class="row">
 
+<div>
 
-    $("sDeposit").textContent =
-      "৳" + deposits.toFixed(2);
+<b>
+${escapeHtml(x.members?.name||"Member")}
+</b>
 
+<div class="muted small">
+${x.meal_date}
+</div>
 
-    $("sExpense").textContent =
-      "৳" + expenses.toFixed(2);
+</div>
 
+<b>
+${Number(x.meal||0)}
+</b>
 
-    $("mealRate").textContent =
-      "৳" +
-      (
-        meals
-        ? expenses / meals
-        : 0
-      ).toFixed(2);
+</div>
 
-  }
+`).join("")
+||'<p class="muted">কোনো meal নেই।</p>';
 
+}
 
-  async function saveMeal(){
 
-    const meal =
-      Number(
-        $("mealCount").value || 0
-      );
+async function saveMeal(){
 
-    const date =
-      $("mealDate").value;
+if(mess.status==="closed")
+return msg("এই Mess বন্ধ করা হয়েছে।");
 
+const memberId=$("mealMember").value;
+const meal=Number($("mealCount").value||0);
+const date=$("mealDate").value;
 
-    const {
-      error
-    } =
-      await db
-        .from("meals")
-        .upsert(
-          {
-            member_id:member.id,
-            meal_date:date,
-            meal
-          },
-          {
-            onConflict:
-              "member_id,meal_date"
-          }
-        );
+if(!memberId)
+return msg("Member নির্বাচন করুন।");
 
+if(meal<0)
+return msg("Meal সঠিকভাবে দিন।");
 
-    if(error)
-      return msg(error.message);
+const {error}=await db
+.from("meals")
+.upsert({
 
+member_id:memberId,
+meal_date:date,
+meal
 
-    msg(
-      "Meal saved.",
-      true
-    );
+},{
+onConflict:"member_id,meal_date"
+});
 
+if(error)
+return msg(error.message);
 
-    await refreshAll();
+msg("Meal saved.",true);
 
-  }
+await refreshAll();
 
+}
 
-  async function loadMeals(){
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("meals")
-        .select("*,members(name)")
-        .order(
-          "meal_date",
-          {
-            ascending:false
-          }
-        )
-        .limit(30);
+async function loadMoney(){
 
+const {data:d}=await db
+.from("deposits")
+.select("*,members(name)")
+.order("deposit_date",{ascending:false})
+.limit(100);
 
-    if(error)
-      return;
+const {data:e}=await db
+.from("expenses")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("expense_date",{ascending:false})
+.limit(100);
 
+deposits=d||[];
+expenses=e||[];
 
-    $("mealList").innerHTML =
-      (data || [])
-        .map(
-          x =>
-            `<div class="row">
-              <span>
-                ${x.members?.name || "Member"}
-                <br>
-                <span class="muted">
-                  ${x.meal_date}
-                </span>
-              </span>
-              <b>${x.meal}</b>
-            </div>`
-        )
-        .join("")
-      ||
-      '<p class="muted">কোনো meal নেই।</p>';
+const depositRows=deposits.map(x=>`
 
-  }
+<div class="row">
 
+<div>
 
-  async function saveDeposit(){
+<b>
+💰 ${escapeHtml(x.members?.name||"Member")}
+</b>
 
-    const amount =
-      Number(
-        $("depositAmount").value || 0
-      );
+<div class="muted small">
+${x.deposit_date}
+${x.note?" • "+escapeHtml(x.note):""}
+</div>
 
-    const date =
-      $("depositDate").value;
+</div>
 
-    const note =
-      $("depositNote").value;
+<b>
++৳${Number(x.amount||0).toFixed(2)}
+</b>
 
+</div>
 
-    if(amount <= 0)
-      return msg("Amount দিন।");
+`);
 
+const expenseRows=expenses.map(x=>`
 
-    const {
-      error
-    } =
-      await db
-        .from("deposits")
-        .insert({
+<div class="row">
 
-          member_id:member.id,
+<div>
 
-          amount,
+<b>
+🧾 ${escapeHtml(x.title)}
+</b>
 
-          deposit_date:date,
+<div class="muted small">
+${x.expense_date}
+${x.note?" • "+escapeHtml(x.note):""}
+</div>
 
-          note
+</div>
 
-        });
+<b>
+-৳${Number(x.amount||0).toFixed(2)}
+</b>
 
+</div>
 
-    if(error)
-      return msg(error.message);
+`);
 
+$("moneyList").innerHTML=
+[
+...depositRows,
+...expenseRows
+].join("")
+||'<p class="muted">কোনো transaction নেই।</p>';
 
-    msg(
-      "Deposit saved.",
-      true
-    );
+}
 
 
-    $("depositAmount").value = "";
+async function saveDeposit(){
 
+if(mess.status==="closed")
+return msg("এই Mess বন্ধ করা হয়েছে।");
 
-    await refreshAll();
+const memberId=$("depositMember").value;
+const amount=Number($("depositAmount").value||0);
+const date=$("depositDate").value;
+const note=$("depositNote").value.trim();
 
-  }
+if(!memberId)
+return msg("Member নির্বাচন করুন।");
 
+if(amount<=0)
+return msg("Amount দিন।");
 
-  async function saveExpense(){
+const {error}=await db
+.from("deposits")
+.insert({
 
-    const title =
-      $("expenseTitle")
-        .value
-        .trim();
+member_id:memberId,
+amount,
+deposit_date:date,
+note
 
-    const amount =
-      Number(
-        $("expenseAmount").value || 0
-      );
+});
 
-    const date =
-      $("expenseDate").value;
+if(error)
+return msg(error.message);
 
-    const note =
-      $("expenseNote").value;
+msg("Deposit saved.",true);
 
+$("depositAmount").value="";
+$("depositNote").value="";
 
-    if(!title || amount <= 0)
-      return msg(
-        "Title এবং Amount দিন।"
-      );
+await refreshAll();
 
+}
 
-    const {
-      error
-    } =
-      await db
-        .from("expenses")
-        .insert({
 
-          mess_id:member.mess_id,
+async function saveExpense(){
 
-          title,
+if(member.role!=="admin")
+return msg("Expense যোগ করার ক্ষমতা শুধু Admin-এর আছে।");
 
-          amount,
+if(mess.status==="closed")
+return msg("এই Mess বন্ধ করা হয়েছে।");
 
-          expense_date:date,
+const title=$("expenseTitle").value.trim();
+const amount=Number($("expenseAmount").value||0);
+const date=$("expenseDate").value;
+const note=$("expenseNote").value.trim();
 
-          note
+if(!title||amount<=0)
+return msg("Title এবং Amount দিন।");
 
-        });
+const {error}=await db
+.from("expenses")
+.insert({
 
+mess_id:member.mess_id,
+title,
+amount,
+expense_date:date,
+note
 
-    if(error)
-      return msg(error.message);
+});
 
+if(error)
+return msg(error.message);
 
-    msg(
-      "Expense saved.",
-      true
-    );
+msg("Expense saved.",true);
 
+$("expenseTitle").value="";
+$("expenseAmount").value="";
+$("expenseNote").value="";
 
-    $("expenseAmount").value = "";
+await refreshAll();
 
+}
 
-    await refreshAll();
 
-  }
+async function loadStats(){
 
+const totalMeals=meals.reduce(
+(s,x)=>s+Number(x.meal||0),0
+);
 
-  async function loadMoney(){
+const totalDeposit=deposits.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
 
-    const [
-      d,
-      e
-    ] =
-      await Promise.all([
+const totalExpense=expenses.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
 
-        db
-          .from("deposits")
-          .select("*,members(name)")
-          .order(
-            "deposit_date",
-            {
-              ascending:false
-            }
-          )
-          .limit(20),
+const rate=
+totalMeals
+?totalExpense/totalMeals
+:0;
 
-        db
-          .from("expenses")
-          .select("*")
-          .order(
-            "expense_date",
-            {
-              ascending:false
-            }
-          )
-          .limit(20)
+$("sMeals").textContent=totalMeals;
+$("sDeposit").textContent=
+"৳"+totalDeposit.toFixed(2);
 
-      ]);
+$("sExpense").textContent=
+"৳"+totalExpense.toFixed(2);
 
+$("mealRate").textContent=
+"৳"+rate.toFixed(2);
 
-    const deposits =
-      (d.data || [])
-        .map(
-          x =>
-            `<div class="row">
-              <span>
-                Deposit • ${x.members?.name || "Member"}
-                <br>
-                <span class="muted">
-                  ${x.deposit_date}
-                </span>
-              </span>
-              <b>
-                +৳${Number(x.amount).toFixed(2)}
-              </b>
-            </div>`
-        );
+$("currentBalance").textContent=
+"৳"+(totalDeposit-totalExpense).toFixed(2);
 
+const myMeal=meals
+.filter(x=>x.member_id===member.id)
+.reduce((s,x)=>s+Number(x.meal||0),0);
 
-    const expenses =
-      (e.data || [])
-        .map(
-          x =>
-            `<div class="row">
-              <span>
-                ${x.title}
-                <br>
-                <span class="muted">
-                  ${x.expense_date}
-                </span>
-              </span>
-              <b>
-                -৳${Number(x.amount).toFixed(2)}
-              </b>
-            </div>`
-        );
+$("homeMealSummary").innerHTML=`
 
+<p>
+আমার মোট Meal:
+<b>${myMeal}</b>
+</p>
 
-    $("moneyList").innerHTML =
-      [
-        ...deposits,
-        ...expenses
-      ].join("")
-      ||
-      '<p class="muted">কোনো transaction নেই।</p>';
+<p style="margin-top:5px">
+বর্তমান Meal Rate:
+<b>৳${rate.toFixed(2)}</b>
+</p>
 
-  }
+`;
 
+}
 
-  async function loadMembers(){
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("members")
-        .select("*")
-        .eq(
-          "mess_id",
-          member.mess_id
-        )
-        .order("name");
+async function loadReports(){
 
+const totalMeals=meals.reduce(
+(s,x)=>s+Number(x.meal||0),0
+);
 
-    if(error)
-      return;
+const totalDeposit=deposits.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
 
+const totalExpense=expenses.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
 
-    $("memberList").innerHTML =
-      (data || [])
-        .map(
-          x =>
-            `<div class="row">
+const rate=
+totalMeals
+?totalExpense/totalMeals
+:0;
 
-              <div>
+$("rMeals").textContent=totalMeals;
+$("rDeposit").textContent=
+"৳"+totalDeposit.toFixed(2);
 
-                <b>
-                  ${escapeHtml(
-                    x.name || "Unnamed"
-                  )}
-                </b>
+$("rExpense").textContent=
+"৳"+totalExpense.toFixed(2);
 
-                <br>
+$("reportTable").innerHTML=
+members.map(m=>{
 
-                <span class="muted">
-                  ${escapeHtml(
-                    x.phone || "Phone নেই"
-                  )}
-                </span>
+const meal=meals
+.filter(x=>x.member_id===m.id)
+.reduce((s,x)=>s+Number(x.meal||0),0);
 
-              </div>
+const deposit=deposits
+.filter(x=>x.member_id===m.id)
+.reduce((s,x)=>s+Number(x.amount||0),0);
 
-              <span class="badge">
-                ${x.role || "member"}
-              </span>
+const cost=meal*rate;
+const balance=deposit-cost;
 
-            </div>`
-        )
-        .join("")
-      ||
-      '<p class="muted">কোনো সদস্য নেই।</p>';
+return `
 
-  }
+<tr>
 
+<td>
+<b>${escapeHtml(m.name)}</b>
+</td>
 
-  async function sendComplaint(){
+<td>
+${meal}
+</td>
 
-    const subject =
-      $("complaintSubject")
-        .value
-        .trim();
+<td>
+৳${deposit.toFixed(2)}
+</td>
 
-    const message =
-      $("complaintMessage")
-        .value
-        .trim();
+<td>
+৳${cost.toFixed(2)}
+</td>
 
+<td>
+<b>৳${balance.toFixed(2)}</b>
+</td>
 
-    if(!subject || !message)
-      return msg(
-        "বিষয় ও অভিযোগ লিখুন।"
-      );
+</tr>
 
+`;
 
-    const {
-      error
-    } =
-      await db
-        .from("complaints")
-        .insert({
+}).join("");
 
-          mess_id:member.mess_id,
+}
 
-          member_id:member.id,
 
-          subject,
+async function loadNotices(){
 
-          message,
+const {data,error}=await db
+.from("notices")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("created_at",{ascending:false})
+.limit(50);
 
-          status:"pending"
+if(error){
+console.warn(error);
+return;
+}
 
-        });
+$("noticeAdminBox").innerHTML=
+member.role==="admin"
+?`
 
+<div class="card">
 
-    if(error)
-      return msg(error.message);
+<h2>➕ নতুন Notice</h2>
 
+<input id="noticeTitle" placeholder="Notice title">
 
-    msg(
-      "অভিযোগ জমা হয়েছে।",
-      true
-    );
+<textarea
+id="noticeMessage"
+placeholder="Notice লিখুন"
+style="margin-top:9px">
+</textarea>
 
+<button
+class="btn"
+style="margin-top:10px"
+onclick="addNotice()">
+Publish Notice
+</button>
 
-    $("complaintSubject").value = "";
+</div>
 
-    $("complaintMessage").value = "";
+`
+:"";
 
+$("noticeList").innerHTML=
+(data||[]).map(x=>`
 
-    await loadComplaints();
+<div class="notice">
 
-  }
+<b>
+${escapeHtml(x.title)}
+</b>
 
+<p style="margin-top:4px">
+${escapeHtml(x.message)}
+</p>
 
-  async function loadComplaints(){
+<div class="muted small">
+${new Date(x.created_at).toLocaleString("bn-BD")}
+</div>
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("complaints")
-        .select("*")
-        .eq(
-          "member_id",
-          member.id
-        )
-        .order(
-          "created_at",
-          {
-            ascending:false
-          }
-        );
+</div>
 
+`).join("")
+||'<p class="muted">কোনো notice নেই।</p>';
 
-    if(error)
-      return;
+}
 
 
-    $("complaintList").innerHTML =
-      (data || [])
-        .map(
-          x =>
-            `<div class="notice">
+async function addNotice(){
 
-              <b>
-                ${escapeHtml(x.subject)}
-              </b>
+if(member.role!=="admin")
+return;
 
-              <br>
+const title=$("noticeTitle").value.trim();
+const message=$("noticeMessage").value.trim();
 
-              ${escapeHtml(x.message)}
+if(!title||!message)
+return msg("Title ও message দিন।");
 
-              <br>
+const {error}=await db
+.from("notices")
+.insert({
 
-              <span class="badge ${
-                x.status === "pending"
-                ? "pending"
-                : "replied"
-              }">
+mess_id:member.mess_id,
+title,
+message
 
-                ${x.status}
+});
 
-              </span>
+if(error)
+return msg(error.message);
 
-              ${
-                x.reply_text
-                ?
-                `<div
-                  style="
-                    margin-top:8px;
-                    padding:9px;
-                    background:white;
-                    border-radius:8px
-                  ">
-                  <b>Reply:</b>
-                  ${escapeHtml(
-                    x.reply_text
-                  )}
-                </div>`
-                :
-                ""
-              }
+msg("Notice প্রকাশ হয়েছে।",true);
 
-            </div>`
-        )
-        .join("")
-      ||
-      '<p class="muted">কোনো অভিযোগ নেই।</p>';
+await loadNotices();
 
-  }
+}
 
 
-  async function loadNotices(){
+async function loadNotifications(){
 
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("notices")
-        .select("*")
-        .eq(
-          "mess_id",
-          member.mess_id
-        )
-        .order(
-          "created_at",
-          {
-            ascending:false
-          }
-        )
-        .limit(30);
+const {data,error}=await db
+.from("notifications")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("created_at",{ascending:false})
+.limit(50);
 
+if(error){
+console.warn(error);
+return;
+}
 
-    if(error)
-      return;
+$("notificationList").innerHTML=
+(data||[]).map(x=>`
 
+<div class="notice">
 
-    $("noticeList").innerHTML =
-      (data || [])
-        .map(
-          x =>
-            `<div class="notice">
+<b>
+${escapeHtml(x.title)}
+</b>
 
-              <b>
-                ${escapeHtml(x.title)}
-              </b>
+<p>
+${escapeHtml(x.message)}
+</p>
 
-              <br>
+<div class="muted small">
+${new Date(x.created_at).toLocaleString("bn-BD")}
+</div>
 
-              ${escapeHtml(
-                x.message ||
-                x.content ||
-                ""
-              )}
+</div>
 
-              <div class="muted small">
-                ${
-                  new Date(
-                    x.created_at
-                  ).toLocaleString("bn-BD")
-                }
-              </div>
+`).join("")
+||'<p class="muted">কোনো notification নেই।</p>';
 
-            </div>`
-        )
-        .join("")
-      ||
-      '<p class="muted">কোনো notice নেই।</p>';
+}
 
-  }
 
+async function loadNotes(){
 
-  function tab(name,el){
+const {data,error}=await db
+.from("notes")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("created_at",{ascending:false})
+.limit(50);
 
-    document
-      .querySelectorAll(
-        "section[id$='Tab']"
-      )
-      .forEach(
-        x =>
-          x.classList.add("hidden")
-      );
+if(error){
+console.warn(error);
+return;
+}
 
+$("noteAdminBox").innerHTML=
+member.role==="admin"
+?`
 
-    $(name+"Tab")
-      .classList
-      .remove("hidden");
+<div class="card">
 
+<h2>➕ নতুন Note</h2>
 
-    document
-      .querySelectorAll(".tab")
-      .forEach(
-        x =>
-          x.classList.remove("active")
-      );
+<input id="noteTitle" placeholder="Title">
 
+<textarea
+id="noteContent"
+placeholder="Note লিখুন"
+style="margin-top:9px">
+</textarea>
 
-    el.classList.add("active");
+<button
+class="btn"
+style="margin-top:10px"
+onclick="addNote()">
+Save Note
+</button>
 
-  }
+</div>
 
+`
+:"";
 
-  function escapeHtml(s){
+$("noteList").innerHTML=
+(data||[]).map(x=>`
 
-    return String(s ?? "")
-      .replace(
-        /[&<>"']/g,
-        c =>
-          ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#039;"
-          }[c])
-      );
+<div class="notice">
 
-  }
+<b>
+${escapeHtml(x.title||"Note")}
+</b>
 
+<p>
+${escapeHtml(x.content||"")}
+</p>
 
-  db.auth.onAuthStateChange(
-    (event,session) => {
+<div class="muted small">
+${new Date(x.created_at).toLocaleString("bn-BD")}
+</div>
 
-      if(
-        session &&
-        !user
-      ){
+</div>
 
-        setTimeout(
-          init,
-          0
-        );
+`).join("")
+||'<p class="muted">কোনো note নেই।</p>';
 
-      }
+}
 
-    }
-  );
 
+async function addNote(){
 
-  init();
+const title=$("noteTitle").value.trim();
+const content=$("noteContent").value.trim();
+
+if(!title&&!content)
+return msg("Note লিখুন।");
+
+const {error}=await db
+.from("notes")
+.insert({
+
+mess_id:member.mess_id,
+title,
+content
+
+});
+
+if(error)
+return msg(error.message);
+
+msg("Note saved.",true);
+
+await loadNotes();
+
+}
+
+
+async function sendComplaint(){
+
+if(!member)
+return;
+
+const subject=$("complaintSubject").value.trim();
+const message=$("complaintMessage").value.trim();
+
+if(!subject||!message)
+return msg("বিষয় ও অভিযোগ লিখুন।");
+
+const {error}=await db
+.from("complaints")
+.insert({
+
+mess_id:member.mess_id,
+member_id:member.id,
+subject,
+message,
+status:"pending"
+
+});
+
+if(error)
+return msg(error.message);
+
+msg("অভিযোগ জমা হয়েছে।",true);
+
+$("complaintSubject").value="";
+$("complaintMessage").value="";
+
+await loadComplaints();
+
+}
+
+
+async function loadComplaints(){
+
+let query=db
+.from("complaints")
+.select("*")
+.eq("mess_id",member.mess_id)
+.order("created_at",{ascending:false});
+
+if(member.role!=="admin")
+query=query.eq("member_id",member.id);
+
+const {data,error}=await query;
+
+if(error){
+console.warn(error);
+return;
+}
+
+$("complaintList").innerHTML=
+(data||[]).map(x=>`
+
+<div class="notice">
+
+<b>
+${escapeHtml(x.subject)}
+</b>
+
+<p>
+${escapeHtml(x.message)}
+</p>
+
+<span class="badge ${
+x.status==="pending"?"pending":""
+}">
+${escapeHtml(x.status||"pending")}
+</span>
+
+${
+x.reply_text
+?`
+<div
+style="
+margin-top:9px;
+background:#fff;
+padding:10px;
+border-radius:9px
+">
+<b>Admin Reply:</b>
+${escapeHtml(x.reply_text)}
+</div>
+`
+:""
+}
+
+${
+member.role==="admin" && !x.reply_text
+?`
+<div style="margin-top:10px">
+
+<input
+id="reply_${x.id}"
+placeholder="Admin reply">
+
+<button
+class="btn blue"
+style="margin-top:7px"
+onclick="replyComplaint('${x.id}')">
+Reply
+</button>
+
+</div>
+`
+:""
+}
+
+</div>
+
+`).join("")
+||'<p class="muted">কোনো অভিযোগ নেই।</p>';
+
+}
+
+
+async function replyComplaint(id){
+
+const input=$("reply_"+id);
+
+const reply=input.value.trim();
+
+if(!reply)
+return msg("Reply লিখুন।");
+
+const {error}=await db
+.from("complaints")
+.update({
+
+reply_text:reply,
+status:"replied",
+replied_at:new Date().toISOString()
+
+})
+.eq("id",id);
+
+if(error)
+return msg(error.message);
+
+msg("Reply দেওয়া হয়েছে।",true);
+
+await loadComplaints();
+
+}
+
+
+async function loadClose(){
+
+const totalMeals=meals.reduce(
+(s,x)=>s+Number(x.meal||0),0
+);
+
+const totalDeposit=deposits.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
+
+const totalExpense=expenses.reduce(
+(s,x)=>s+Number(x.amount||0),0
+);
+
+const rate=
+totalMeals
+?totalExpense/totalMeals
+:0;
+
+$("closeReport").innerHTML=`
+
+<div class="grid3">
+
+<div class="stat">
+<span>Total Meal</span>
+<b>${totalMeals}</b>
+</div>
+
+<div class="stat">
+<span>Total Deposit</span>
+<b>৳${totalDeposit.toFixed(2)}</b>
+</div>
+
+<div class="stat">
+<span>Total Expense</span>
+<b>৳${totalExpense.toFixed(2)}</b>
+</div>
+
+</div>
+
+<div
+class="rate-box"
+style="margin-top:14px">
+
+Current Meal Rate:
+<b>৳${rate.toFixed(2)}</b>
+
+<br>
+
+Final Balance:
+<b>
+৳${(totalDeposit-totalExpense).toFixed(2)}
+</b>
+
+</div>
+
+`;
+
+if(member.role==="admin" && mess.status!=="closed"){
+
+$("closeActionBox").innerHTML=`
+
+<button
+class="btn danger"
+onclick="closeMess()">
+🔒 Close Mess
+</button>
+
+`;
+
+}else if(mess.status==="closed"){
+
+$("closeActionBox").innerHTML=`
+
+<div class="success">
+এই Mess ইতোমধ্যে Closed হয়েছে।
+</div>
+
+`;
+
+}else{
+
+$("closeActionBox").innerHTML=
+'<p class="muted">শুধু Admin Mess close করতে পারবে।</p>';
+
+}
+
+}
+
+
+async function closeMess(){
+
+if(member.role!=="admin")
+return msg("শুধু Admin Mess close করতে পারবে।");
+
+if(mess.status==="closed")
+return;
+
+const ok=confirm(
+"আপনি কি নিশ্চিতভাবে এই Mess Close করতে চান?"
+);
+
+if(!ok)
+return;
+
+const {error}=await db
+.from("messes")
+.update({
+
+status:"closed",
+closed_at:new Date().toISOString(),
+closed_by:user.id
+
+})
+.eq("id",mess.id);
+
+if(error)
+return msg(error.message);
+
+mess.status="closed";
+
+msg(
+"Mess সফলভাবে Closed হয়েছে।",
+true
+);
+
+await loadMess();
+
+}
+
+
+function openSection(name,el){
+
+document
+.querySelectorAll(".section")
+.forEach(x=>x.classList.remove("active"));
+
+const section=$(name+"Section");
+
+if(section)
+section.classList.add("active");
+
+document
+.querySelectorAll(".menu button")
+.forEach(x=>x.classList.remove("active"));
+
+if(el)
+el.classList.add("active");
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+function escapeHtml(s){
+
+return String(s??"")
+.replace(
+/[&<>"']/g,
+c=>({
+
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+
+}[c])
+);
+
+}
+
+
+db.auth.onAuthStateChange(
+(event,session)=>{
+
+if(session&&!user){
+
+setTimeout(init,0);
+
+}
+
+}
+);
+
+
+init();
 
 </script>
 
