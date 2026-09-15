@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>CCCL MEAL MANAGEMENT</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,"Noto Sans Bengali",sans-serif;background:#f1f5f9;color:#0f172a;line-height:1.5}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer;border:0}
+    .container{max-width:1100px;margin:auto;padding:16px}
+    .topbar{background:#0f172a;color:#fff;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px #0002}
+    .nav{max-width:1100px;margin:auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{font-weight:800;font-size:20px}
+    .brand small{display:block;font-size:11px;color:#94a3b8;font-weight:500}
+    .btn{padding:10px 14px;border-radius:10px;background:#16a34a;color:white;font-weight:700}
+    .btn.secondary{background:#e2e8f0;color:#0f172a}
+    .btn.danger{background:#dc2626}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .card{background:white;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 12px #0f172a12}
+    h1{font-size:25px;margin-bottom:8px} h2{font-size:19px;margin-bottom:12px}
+    .muted{color:#64748b;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    input,textarea,select{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:white;outline:none}
+    input:focus,textarea:focus,select:focus{border-color:#16a34a;box-shadow:0 0 0 3px #16a34a18}
+    textarea{min-height:100px;resize:vertical}
+    .stat{padding:16px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0}
+    .stat b{display:block;font-size:23px;margin-top:4px}
+    .tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}
+    .tab{white-space:nowrap;padding:10px 13px;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:700}
+    .tab.active{background:#0f172a;color:#fff}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #e2e8f0}
+    .row:last-child{border-bottom:0}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
+    .badge.pending{background:#fef3c7;color:#92400e}
+    .badge.replied{background:#dbeafe;color:#1e40af}
+    .notice{padding:12px;border-radius:10px;background:#eff6ff;border-left:4px solid #2563eb;margin-bottom:10px}
+    .error{background:#fee2e2;color:#991b1b;padding:10px;border-radius:10px;margin:10px 0}
+    .success{background:#dcfce7;color:#166534;padding:10px;border-radius:10px;margin:10px 0}
+    .hidden{display:none!important}
+    .center{min-height:100vh;display:grid;place-items:center;padding:18px}
+    .auth{width:min(440px,100%)}
+    .logo{font-size:28px;font-weight:900;text-align:center;margin-bottom:5px}
+    .divider{height:1px;background:#e2e8f0;margin:18px 0}
+    .small{font-size:12px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:700px){.grid,.grid3{grid-template-columns:1fr}.nav{padding:12px}.container{padding:12px}}
+  </style>
+</head>
+<body>
+
+<div id="authScreen" class="center">
+  <div class="card auth">
+    <div class="logo">CCCL MEAL MANAGEMENT</div>
+    <p class="muted" style="text-align:center">Meal • Deposit • Expense • Members • Complaints</p>
+    <div id="authMsg"></div>
+
+    <div id="loginBox">
+      <h2 style="margin-top:18px">Login</h2>
+      <label>Email / Phone</label>
+      <input id="loginId" placeholder="Email or phone">
+      <label style="margin-top:10px">Password</label>
+      <input id="loginPass" type="password" placeholder="Password">
+      <button class="btn" style="width:100%;margin-top:14px" onclick="login()">Login</button>
+      <button class="btn secondary" style="width:100%;margin-top:8px" onclick="showSignup()">Create account</button>
+    </div>
+
+    <div id="signupBox" class="hidden">
+      <h2 style="margin-top:18px">Create account</h2>
+      <label>Name</label>
+      <input id="signupName" placeholder="Full name">
+      <label style="margin-top:10px">Phone</label>
+      <input id="signupPhone" placeholder="01XXXXXXXXX">
+      <label style="margin-top:10px">Email</label>
+      <input id="signupEmail" type="email" placeholder="name@example.com">
+      <label style="margin-top:10px">Password</label>
+      <input id="signupPass" type="password" placeholder="Minimum 6 characters">
+      <button class="btn" style="width:100%;margin-top:14px" onclick="signup()">Create account</button>
+      <button class="btn secondary" style="width:100%;margin-top:8px" onclick="showLogin()">Back to login</button>
+      <p class="muted small" style="margin-top:10px">Phone login requires Phone Auth to be enabled in Supabase.</p>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="topbar">
+    <div class="nav">
+      <div class="brand">CCCL MEAL MANAGEMENT<small id="userLine"></small></div>
+      <button class="btn danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <div id="appMsg"></div>
+
+    <div id="noMess" class="card hidden">
+      <h1>Welcome 👋</h1>
+      <p class="muted">প্রথমে একটি মেস তৈরি করো অথবা Mess Code দিয়ে কোনো মেসে Join করো।</p>
+      <div class="grid" style="margin-top:15px">
+        <div>
+          <h2>Create Mess</h2>
+          <input id="newMessName" placeholder="Mess name">
+          <button class="btn" style="margin-top:9px" onclick="createMess()">Create Mess</button>
+        </div>
+        <div>
+          <h2>Join Mess</h2>
+          <input id="joinCode" placeholder="Mess Code">
+          <button class="btn" style="margin-top:9px" onclick="joinMess()">Join Mess</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+      <div class="card">
+        <h1 id="messTitle">Mess</h1>
+        <p class="muted">Mess Code: <b id="messCode"></b></p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="tab('home',this)">Dashboard</button>
+        <button class="tab" onclick="tab('meals',this)">Meals</button>
+        <button class="tab" onclick="tab('money',this)">Money</button>
+        <button class="tab" onclick="tab('members',this)">Members</button>
+        <button class="tab" onclick="tab('complaints',this)">অভিযোগ</button>
+        <button class="tab" onclick="tab('notices',this)">Notice</button>
+      </div>
+
+      <section id="homeTab">
+        <div class="grid3">
+          <div class="stat"><span class="muted">Total Meals</span><b id="sMeals">0</b></div>
+          <div class="stat"><span class="muted">Total Deposit</span><b id="sDeposit">৳0</b></div>
+          <div class="stat"><span class="muted">Total Expense</span><b id="sExpense">৳0</b></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>Current Meal Rate</h2>
+          <div style="font-size:32px;font-weight:900" id="mealRate">৳0.00</div>
+          <p class="muted">Meal Rate = Total Expense ÷ Total Meals</p>
+        </div>
+      </section>
+
+      <section id="mealsTab" class="hidden">
+        <div class="card">
+          <h2>আজকের Meal</h2>
+          <div class="grid">
+            <div><label>Date</label><input id="mealDate" type="date"></div>
+            <div><label>Meal</label><input id="mealCount" type="number" min="0" step="0.5" value="1"></div>
+          </div>
+          <button class="btn" style="margin-top:12px" onclick="saveMeal()">Save Meal</button>
+        </div>
+        <div class="card"><h2>Recent Meals</h2><div id="mealList"></div></div>
+      </section>
+
+      <section id="moneyTab" class="hidden">
+        <div class="grid">
+          <div class="card">
+            <h2>Add Deposit</h2>
+            <input id="depositAmount" type="number" min="0" placeholder="Amount">
+            <input id="depositDate" type="date" style="margin-top:8px">
+            <input id="depositNote" placeholder="Note" style="margin-top:8px">
+            <button class="btn" style="margin-top:10px" onclick="saveDeposit()">Save Deposit</button>
+          </div>
+          <div class="card">
+            <h2>Add Expense</h2>
+            <input id="expenseTitle" placeholder="Expense title">
+            <input id="expenseAmount" type="number" min="0" placeholder="Amount" style="margin-top:8px">
+            <input id="expenseDate" type="date" style="margin-top:8px">
+            <input id="expenseNote" placeholder="Note" style="margin-top:8px">
+            <button class="btn" style="margin-top:10px" onclick="saveExpense()">Save Expense</button>
+          </div>
+        </div>
+        <div class="card"><h2>Recent Transactions</h2><div id="moneyList"></div></div>
+      </section>
+
+      <section id="membersTab" class="hidden">
+        <div class="card">
+          <h2>সব সদস্য</h2>
+          <div id="memberList"></div>
+        </div>
+      </section>
+
+      <section id="complaintsTab" class="hidden">
+        <div class="card">
+          <h2>অভিযোগ / Feedback</h2>
+          <input id="complaintSubject" placeholder="বিষয়">
+          <textarea id="complaintMessage" placeholder="অভিযোগ বা মতামত লিখুন" style="margin-top:8px"></textarea>
+          <button class="btn" style="margin-top:10px" onclick="sendComplaint()">Submit</button>
+        </div>
+        <div class="card"><h2>আমার অভিযোগ</h2><div id="complaintList"></div></div>
+      </section>
+
+      <section id="noticesTab" class="hidden">
+        <div class="card">
+          <h2>Notice & Notifications</h2>
+          <div id="noticeList"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://nqfxmdzqtqilegbkurvq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_SCzoBQ4vrmNO6mH99uq-mA_M12pvfjq";
+
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  let user = null;
+  let member = null;
+  let mess = null;
+
+  const $ = id => document.getElementById(id);
+  const today = () => new Date().toISOString().slice(0,10);
+  $("mealDate").value = today();
+  $("depositDate").value = today();
+  $("expenseDate").value = today();
+
+  function msg(text, ok=false, target="appMsg"){
+    $(target).innerHTML = `<div class="${ok?'success':'error'}">${text}</div>`;
+    setTimeout(()=>$(target).innerHTML="",4000);
+  }
+  function showSignup(){ $("loginBox").classList.add("hidden"); $("signupBox").classList.remove("hidden"); }
+  function showLogin(){ $("signupBox").classList.add("hidden"); $("loginBox").classList.remove("hidden"); }
+
+  async function signup(){
+    const name=$("signupName").value.trim(), phone=$("signupPhone").value.trim();
+    const email=$("signupEmail").value.trim(), pass=$("signupPass").value;
+    if(!name || !pass || (!email && !phone)) return msg("নাম, password এবং email/phone দিন।",false,"authMsg");
+    const payload={password:pass, options:{data:{name,phone}}};
+    if(email) payload.email=email; else payload.phone=phone;
+    const {data,error}=await db.auth.signUp(payload);
+    if(error) return msg(error.message,false,"authMsg");
+    if(data.user){
+      if(email) {
+        await db.from("members").insert({name,phone:phone||null,role:"member",active:true});
+      }
+      msg("Account তৈরি হয়েছে। এখন Login করুন।",true,"authMsg");
+      showLogin();
+    }
+  }
+
+  async function login(){
+    const id=$("loginId").value.trim(), password=$("loginPass").value;
+    if(!id || !password) return msg("Login তথ্য দিন।",false,"authMsg");
+    const body=id.includes("@") ? {email:id,password} : {phone:id,password};
+    const {error}=await db.auth.signInWithPassword(body);
+    if(error) return msg(error.message,false,"authMsg");
+    await init();
+  }
+
+  async function logout(){ await db.auth.signOut(); location.reload(); }
+
+  async function init(){
+    const {data}=await db.auth.getUser();
+    user=data.user;
+    if(!user){ $("authScreen").classList.remove("hidden"); $("app").classList.add("hidden"); return; }
+    $("authScreen").classList.add("hidden"); $("app").classList.remove("hidden");
+    $("userLine").textContent=user.email || user.phone || "";
+    await loadMember();
+  }
+
+  async function loadMember(){
+    let q=await db.from("members").select("*").eq("id",user.id).maybeSingle();
+    if(q.error){ console.warn(q.error); }
+    member=q.data;
+
+    if(!member){
+      $("noMess").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+      return;
+    }
+    if(member.mess_id){
+      await loadMess();
+    }else{
+      $("noMess").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+    }
+  }
+
+  async function createMess(){
+    const name=$("newMessName").value.trim();
+    if(!name) return msg("Mess name দিন।");
+    const code=("CCCL-"+Math.random().toString(36).slice(2,7)).toUpperCase();
+    const {data,error}=await db.from("messes").insert({name,mess_code:code,owner_id:user.id}).select().single();
+    if(error) return msg(error.message);
+    const up=await db.from("members").update({mess_id:data.id,role:"admin"}).eq("id",user.id);
+    if(up.error) return msg(up.error.message);
+    await loadMember();
+  }
+
+  async function joinMess(){
+    const code=$("joinCode").value.trim().toUpperCase();
+    if(!code) return msg("Mess Code দিন।");
+    const {data,error}=await db.from("messes").select("*").eq("mess_code",code).maybeSingle();
+    if(error) return msg(error.message);
+    if(!data) return msg("এই Mess Code পাওয়া যায়নি।");
+    if(!member){
+      const ins=await db.from("members").insert({id:user.id,mess_id:data.id,name:user.user_metadata?.name||"Member",phone:user.phone||null,role:"member",active:true});
+      if(ins.error) return msg(ins.error.message);
+    }else{
+      const up=await db.from("members").update({mess_id:data.id,role:"member"}).eq("id",user.id);
+      if(up.error) return msg(up.error.message);
+    }
+    await loadMember();
+  }
+
+  async function loadMess(){
+    const {data,error}=await db.from("messes").select("*").eq("id",member.mess_id).single();
+    if(error) return msg(error.message);
+    mess=data;
+    $("noMess").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    $("messTitle").textContent=mess.name;
+    $("messCode").textContent=mess.mess_code;
+    await refreshAll();
+  }
+
+  async function refreshAll(){
+    await Promise.all([loadStats(),loadMeals(),loadMoney(),loadMembers(),loadComplaints(),loadNotices()]);
+  }
+
+  async function loadStats(){
+    const [m,d,e]=await Promise.all([
+      db.from("meals").select("meal"),
+      db.from("deposits").select("amount"),
+      db.from("expenses").select("amount")
+    ]);
+    const meals=(m.data||[]).reduce((s,x)=>s+Number(x.meal||0),0);
+    const deposits=(d.data||[]).reduce((s,x)=>s+Number(x.amount||0),0);
+    const expenses=(e.data||[]).reduce((s,x)=>s+Number(x.amount||0),0);
+    $("sMeals").textContent=meals;
+    $("sDeposit").textContent="৳"+deposits.toFixed(2);
+    $("sExpense").textContent="৳"+expenses.toFixed(2);
+    $("mealRate").textContent="৳"+(meals?expenses/meals:0).toFixed(2);
+  }
+
+  async function saveMeal(){
+    const meal=Number($("mealCount").value||0), date=$("mealDate").value;
+    const {error}=await db.from("meals").upsert({member_id:member.id,meal_date:date,meal},{onConflict:"member_id,meal_date"});
+    if(error) return msg(error.message);
+    msg("Meal saved.",true); await refreshAll();
+  }
+
+  async function loadMeals(){
+    const {data,error}=await db.from("meals").select("*,members(name)").order("meal_date",{ascending:false}).limit(30);
+    if(error) return;
+    $("mealList").innerHTML=(data||[]).map(x=>`<div class="row"><span>${x.members?.name||"Member"}<br><span class="muted">${x.meal_date}</span></span><b>${x.meal}</b></div>`).join("") || '<p class="muted">কোনো meal নেই।</p>';
+  }
+
+  async function saveDeposit(){
+    const amount=Number($("depositAmount").value||0), date=$("depositDate").value, note=$("depositNote").value;
+    if(amount<=0) return msg("Amount দিন।");
+    const {error}=await db.from("deposits").insert({member_id:member.id,amount,deposit_date:date,note});
+    if(error) return msg(error.message);
+    msg("Deposit saved.",true); $("depositAmount").value=""; await refreshAll();
+  }
+
+  async function saveExpense(){
+    const title=$("expenseTitle").value.trim(), amount=Number($("expenseAmount").value||0), date=$("expenseDate").value, note=$("expenseNote").value;
+    if(!title || amount<=0) return msg("Title এবং Amount দিন।");
+    const {error}=await db.from("expenses").insert({mess_id:member.mess_id,title,amount,expense_date:date,note});
+    if(error) return msg(error.message);
+    msg("Expense saved.",true); $("expenseAmount").value=""; await refreshAll();
+  }
+
+  async function loadMoney(){
+    const [d,e]=await Promise.all([
+      db.from("deposits").select("*,members(name)").order("deposit_date",{ascending:false}).limit(20),
+      db.from("expenses").select("*").order("expense_date",{ascending:false}).limit(20)
+    ]);
+    const deposits=(d.data||[]).map(x=>`<div class="row"><span>Deposit • ${x.members?.name||"Member"}<br><span class="muted">${x.deposit_date}</span></span><b>+৳${Number(x.amount).toFixed(2)}</b></div>`);
+    const expenses=(e.data||[]).map(x=>`<div class="row"><span>${x.title}<br><span class="muted">${x.expense_date}</span></span><b>-৳${Number(x.amount).toFixed(2)}</b></div>`);
+    $("moneyList").innerHTML=[...deposits,...expenses].join("")||'<p class="muted">কোনো transaction নেই।</p>';
+  }
+
+  async function loadMembers(){
+    const {data,error}=await db.from("members").select("*").eq("mess_id",member.mess_id).order("name");
+    if(error) return;
+    $("memberList").innerHTML=(data||[]).map(x=>`<div class="row"><div><b>${escapeHtml(x.name||"Unnamed")}</b><br><span class="muted">${escapeHtml(x.phone||"Phone নেই")}</span></div><span class="badge">${x.role||"member"}</span></div>`).join("")||'<p class="muted">কোনো সদস্য নেই।</p>';
+  }
+
+  async function sendComplaint(){
+    const subject=$("complaintSubject").value.trim(), message=$("complaintMessage").value.trim();
+    if(!subject || !message) return msg("বিষয় ও অভিযোগ লিখুন।");
+    const {error}=await db.from("complaints").insert({mess_id:member.mess_id,member_id:member.id,subject,message,status:"pending"});
+    if(error) return msg(error.message);
+    msg("অভিযোগ জমা হয়েছে।",true); $("complaintSubject").value=""; $("complaintMessage").value=""; await loadComplaints();
+  }
+
+  async function loadComplaints(){
+    const {data,error}=await db.from("complaints").select("*").eq("member_id",member.id).order("created_at",{ascending:false});
+    if(error) return;
+    $("complaintList").innerHTML=(data||[]).map(x=>`<div class="notice"><b>${escapeHtml(x.subject)}</b><br>${escapeHtml(x.message)}<br><span class="badge ${x.status==='pending'?'pending':'replied'}">${x.status}</span>${x.reply_text?`<div style="margin-top:8px;padding:9px;background:white;border-radius:8px"><b>Reply:</b> ${escapeHtml(x.reply_text)}</div>`:""}</div>`).join("")||'<p class="muted">কোনো অভিযোগ নেই।</p>';
+  }
+
+  async function loadNotices(){
+    const {data,error}=await db.from("notices").select("*").eq("mess_id",member.mess_id).order("created_at",{ascending:false}).limit(30);
+    if(error) return;
+    $("noticeList").innerHTML=(data||[]).map(x=>`<div class="notice"><b>${escapeHtml(x.title)}</b><br>${escapeHtml(x.message||x.content||"")}<div class="muted small">${new Date(x.created_at).toLocaleString("bn-BD")}</div></div>`).join("")||'<p class="muted">কোনো notice নেই।</p>';
+  }
+
+  function tab(name,el){
+    document.querySelectorAll("section[id$='Tab']").forEach(x=>x.classList.add("hidden"));
+    $(name+"Tab").classList.remove("hidden");
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    el.classList.add("active");
+  }
+
+  function escapeHtml(s){
+    return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+
+  db.auth.onAuthStateChange((event,session)=>{
+    if(session && !user) setTimeout(init,0);
+  });
+  init();
+</script>
+</body>
+</html>
