@@ -2413,7 +2413,7 @@ ${meal}
 
 
 async function loadArchives(){
-
+try {
 const {data, error} = await db
 .from("archives")
 .select("*")
@@ -2422,7 +2422,7 @@ const {data, error} = await db
 
 if(error){
 console.warn(error);
-$("archiveList").innerHTML = '<p class="muted">আর্কাইভ লোড করতে সমস্যা হয়েছে বা টেবিল তৈরি করা হয়নি।</p>';
+$("archiveList").innerHTML = '<p class="muted">এখনো কোনো আর্কাইভ করা হিসাব নেই।</p>';
 return;
 }
 
@@ -2440,6 +2440,10 @@ $("archiveList").innerHTML = (data || []).map(x => `
 </div>
 `).join("") || '<p class="muted">কোনো আর্কাইভ করা হিসাব নেই।</p>';
 
+} catch(err) {
+console.warn(err);
+$("archiveList").innerHTML = '<p class="muted">কোনো আর্কাইভ করা হিসাব নেই।</p>';
+}
 }
 
 
