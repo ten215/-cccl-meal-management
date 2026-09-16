@@ -1489,7 +1489,6 @@ $("profileInitials").textContent = identifier.charAt(0).toUpperCase();
 
 await loadMember();
 
-// Check URL query parameters for invite code join
 const urlParams = new URLSearchParams(window.location.search);
 const inviteCode = urlParams.get('code');
 if(inviteCode && !member?.mess_id){
@@ -1913,14 +1912,22 @@ ${escapeHtml(x.name||"Unnamed")}
 `)
 .join("");
 
+const currentMealVal = $("mealMember").value;
+const currentDepVal = $("depositMember").value;
+
 $("mealMember").innerHTML=options;
 $("depositMember").innerHTML=options;
 
-if(member){
-
+if(currentMealVal && members.some(m => m.id === currentMealVal)){
+$("mealMember").value = currentMealVal;
+} else if(member){
 $("mealMember").value=member.id;
-$("depositMember").value=member.id;
+}
 
+if(currentDepVal && members.some(m => m.id === currentDepVal)){
+$("depositMember").value = currentDepVal;
+} else if(member){
+$("depositMember").value=member.id;
 }
 
 }
