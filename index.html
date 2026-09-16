@@ -3043,4 +3043,39 @@ behavior:"smooth"
 
 function escapeHtml(s){
 
-----
+return String(s??"")
+.replace(
+/[&<>"']/g,
+c=>({
+
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+
+}[c])
+);
+
+}
+
+
+db.auth.onAuthStateChange(
+(event,session)=>{
+
+if(session&&!user){
+
+setTimeout(init,0);
+
+}
+
+}
+);
+
+
+init();
+
+</script>
+
+</body>
+</html>
