@@ -763,6 +763,11 @@ Members
 Reports
 </button>
 
+<button onclick="openSection('archives',this)">
+<span class="menu-icon">📂</span>
+Archive
+</button>
+
 <button onclick="openSection('notices',this)">
 <span class="menu-icon">📢</span>
 Notice
@@ -1143,6 +1148,29 @@ onclick="window.print()">
 </section>
 
 
+<!-- ARCHIVE / HISTORY -->
+
+<section id="archivesSection" class="section">
+
+<div class="card">
+
+<h2>
+📂 Archived / Closed Months History
+</h2>
+
+<p class="muted">
+পূর্বে ক্লোজ করা বা আর্কাইভ করা মাসগুলোর ফাইনাল হিসাব এখানে সংরক্ষিত থাকবে।
+</p>
+
+<div id="archiveList" style="margin-top:15px">
+লোড হচ্ছে...
+</div>
+
+</div>
+
+</section>
+
+
 <!-- NOTICE -->
 
 <section id="noticesSection" class="section">
@@ -1252,7 +1280,7 @@ Submit
 </h2>
 
 <p class="muted">
-মেস বন্ধ করলে বর্তমান মাসের সব হিসাব রিসেট হয়ে আর্কাইভ হবে এবং নতুন মাসের জন্য ফ্রেশ ড্যাশবোর্ড শুরু হবে।
+মেস বন্ধ করলে বর্তমান মাসের সব হিসাব রিসেট হয়ে আর্কাইভে জমা হবে এবং নতুন মাসের জন্য ফ্রেশ ড্যাশবোর্ড শুরু হবে।
 </p>
 
 <div
@@ -1740,6 +1768,7 @@ await loadMeals();
 await loadMoney();
 await loadStats();
 await loadReports();
+await loadArchives();
 await loadNotices();
 await loadNotifications();
 await loadNotes();
@@ -2383,6 +2412,37 @@ ${meal}
 }
 
 
+async function loadArchives(){
+
+const {data, error} = await db
+.from("archives")
+.select("*")
+.eq("mess_id", mess.id)
+.order("created_at", {ascending: false});
+
+if(error){
+console.warn(error);
+$("archiveList").innerHTML = '<p class="muted">আর্কাইভ লোড করতে সমস্যা হয়েছে বা টেবিল তৈরি করা হয়নি।</p>';
+return;
+}
+
+$("archiveList").innerHTML = (data || []).map(x => `
+<div class="card" style="background:#f8fafc; border:1px solid #e2e8f0; margin-bottom:10px;">
+<h3>📅 ক্লোজড তারিখ: ${new Date(x.created_at).toLocaleString("bn-BD")}</h3>
+<div class="grid3" style="margin-top:10px;">
+<div>মোট মিল: <b>${x.total_meals}</b></div>
+<div>মোট জমা: <b>৳${Number(x.total_deposit).toFixed(2)}</b></div>
+<div>মোট খরচ: <b>৳${Number(x.total_expense).toFixed(2)}</b></div>
+</div>
+<div style="margin-top:8px;">
+মিল রেট: <b>৳${Number(x.meal_rate).toFixed(2)}</b> | ফাইনাল ব্যালেন্স: <b>৳${Number(x.final_balance).toFixed(2)}</b>
+</div>
+</div>
+`).join("") || '<p class="muted">কোনো আর্কাইভ করা হিসাব নেই।</p>';
+
+}
+
+
 async function loadNotices(){
 
 const {data,error}=await db
@@ -2848,7 +2908,7 @@ onclick="closeMess()">
 $("closeActionBox").innerHTML=`
 
 <div class="success" style="display:flex;justify-content:space-between;align-items:center;">
-<span>এই Mess ইতোমধ্যে Closed হয়েছে এবং হিসাব রিসেট করা হয়েছে।</span>
+<span>এই Mess ইতোমধ্যে Closed হয়েছে এবং হিসাব আর্কাইভ করা হয়েছে।</span>
 <button class="btn" style="padding:6px 12px;font-size:12px;" onclick="reopenMess()">New Month Start / Reopen</button>
 </div>
 
@@ -2873,13 +2933,29 @@ if(mess.status==="closed")
 return;
 
 const ok=confirm(
-"আপনি কি নিশ্চিতভাবে এই Mess Close করতে চান? ক্লোজ করলে সমস্ত মিল ও খরচ রিসেট হয়ে যাবে।"
+"আপনি কি নিশ্চিতভাবে এই Mess Close করতে চান? ক্লোজ করলে হিসাব আর্কাইভে জমা হবে এবং ড্যাশবোর্ড রিসেট হবে।"
 );
 
 if(!ok)
 return;
 
-// 1. Update mess status to closed
+const totalMeals = meals.reduce((s,x)=>s+Number(x.meal||0),0);
+const totalDeposit = deposits.reduce((s,x)=>s+Number(x.amount||0),0);
+const totalExpense = expenses.reduce((s,x)=>s+Number(x.amount||0),0);
+const mealRate = totalMeals ? totalExpense / totalMeals : 0;
+const finalBalance = totalDeposit - totalExpense;
+
+// 1. Save summary into archives table
+await db.from("archives").insert({
+mess_id: mess.id,
+total_meals: totalMeals,
+total_deposit: totalDeposit,
+total_expense: totalExpense,
+meal_rate: mealRate,
+final_balance: finalBalance
+});
+
+// 2. Update mess status to closed
 const {error}=await db
 .from("messes")
 .update({
@@ -2892,7 +2968,7 @@ closed_by:user.id
 if(error)
 return msg(error.message);
 
-// 2. Delete/Reset all meals and expenses for this mess to clear dashboard calculations
+// 3. Delete/Reset all meals and expenses for this mess
 const memberIds = members.map(m => m.id);
 if(memberIds.length > 0) {
 await db.from("meals").delete().in("member_id", memberIds);
@@ -2902,7 +2978,7 @@ await db.from("expenses").delete().eq("mess_id", mess.mess_id);
 
 mess.status="closed";
 
-msg("Mess সফলভাবে Closed ও হিসাব রিসেট হয়েছে।", true);
+msg("Mess সফলভাবে Closed ও আর্কাইভে জমা হয়েছে।", true);
 
 await loadMess();
 
