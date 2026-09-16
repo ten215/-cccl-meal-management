@@ -2074,12 +2074,13 @@ meals = [];
 return;
 }
 
+// ফিক্সড: সরাসরি মেম্বার আইডিগুলোর ইন ক্লজ ব্যবহার করে নির্ভুলভাবে সমস্ত মিল ফেচ করা
 const {data,error}=await db
 .from("meals")
-.select("*,members(name)")
-.in("member_id", memberIds)
+.select("*,members!inner(name, mess_id)")
+.eq("members.mess_id", member.mess_id)
 .order("meal_date",{ascending:false})
-.limit(100);
+.limit(500);
 
 if(error){
 
@@ -2167,12 +2168,13 @@ return;
 
 const memberIds = members.map(m => m.id);
 
+// ফিক্সড: সরাসরি মেস আইডির মেম্বারদের ডিপোজিট ফেচ করা
 const {data:d}=memberIds.length > 0 ? await db
 .from("deposits")
-.select("*,members(name)")
-.in("member_id", memberIds)
+.select("*,members!inner(name, mess_id)")
+.eq("members.mess_id", member.mess_id)
 .order("deposit_date",{ascending:false})
-.limit(100) : {data: []};
+.limit(500) : {data: []};
 
 const {data:e}=await db
 .from("expenses")
@@ -3006,6 +3008,7 @@ if(!ok)
 return;
 
 const totalMeals = meals.reduce((s,x)=>s+Number(x.meal||0),0);
+
 const totalDeposit = deposits.reduce((s,x)=>s+Number(x.amount||0),0);
 const totalExpense = expenses.reduce((s,x)=>s+Number(x.amount||0),0);
 const mealRate = totalMeals ? totalExpense / totalMeals : 0;
