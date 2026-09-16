@@ -1975,13 +1975,22 @@ await loadMembers();
 
 async function loadMeals(){
 
+if(mess.status==="closed") {
+meals = [];
+$("mealList").innerHTML = '<p class="muted">মেস ক্লোজড রয়েছে। কোনো রানিং মিল নেই।</p>';
+return;
+}
+
+const memberIds = members.map(m => m.id);
+if(memberIds.length === 0) {
+meals = [];
+return;
+}
+
 const {data,error}=await db
 .from("meals")
 .select("*,members(name)")
-.eq(
-"members.mess_id",
-member.mess_id
-)
+.in("member_id", memberIds)
 .order("meal_date",{ascending:false})
 .limit(100);
 
@@ -2062,11 +2071,21 @@ await refreshAll();
 
 async function loadMoney(){
 
-const {data:d}=await db
+if(mess.status==="closed") {
+deposits = [];
+expenses = [];
+$("moneyList").innerHTML = '<p class="muted">মেস ক্লোজড রয়েছে। কোনো রানিং লেনদেন নেই।</p>';
+return;
+}
+
+const memberIds = members.map(m => m.id);
+
+const {data:d}=memberIds.length > 0 ? await db
 .from("deposits")
 .select("*,members(name)")
+.in("member_id", memberIds)
 .order("deposit_date",{ascending:false})
-.limit(100);
+.limit(100) : {data: []};
 
 const {data:e}=await db
 .from("expenses")
@@ -2222,6 +2241,16 @@ await refreshAll();
 
 async function loadStats(){
 
+if(mess.status==="closed") {
+$("sMeals").textContent = "0";
+$("sDeposit").textContent = "৳0.00";
+$("sExpense").textContent = "৳0.00";
+$("mealRate").textContent = "৳0.00";
+$("currentBalance").textContent = "৳0.00";
+$("homeMealSummary").innerHTML = "মেস ক্লোজড রয়েছে।";
+return;
+}
+
 const totalMeals=meals.reduce(
 (s,x)=>s+Number(x.meal||0),0
 );
@@ -2274,6 +2303,14 @@ $("homeMealSummary").innerHTML=`
 
 
 async function loadReports(){
+
+if(mess.status==="closed") {
+$("rMeals").textContent = "0";
+$("rDeposit").textContent = "৳0.00";
+$("rExpense").textContent = "৳0.00";
+$("reportTable").innerHTML = '<tr><td colspan="5" class="muted">মেস ক্লোজড রয়েছে।</td></tr>';
+return;
+}
 
 const totalMeals=meals.reduce(
 (s,x)=>s+Number(x.meal||0),0
@@ -2810,8 +2847,9 @@ onclick="closeMess()">
 
 $("closeActionBox").innerHTML=`
 
-<div class="success">
-এই Mess ইতোমধ্যে Closed হয়েছে এবং হিসাব আর্কাইভ করা হয়েছে। নতুন মাসের জন্য নতুন মেস তৈরি করতে পারেন।
+<div class="success" style="display:flex;justify-content:space-between;align-items:center;">
+<span>এই Mess ইতোমধ্যে Closed হয়েছে এবং হিসাব রিসেট করা হয়েছে।</span>
+<button class="btn" style="padding:6px 12px;font-size:12px;" onclick="reopenMess()">New Month Start / Reopen</button>
 </div>
 
 `;
@@ -2835,33 +2873,54 @@ if(mess.status==="closed")
 return;
 
 const ok=confirm(
-"আপনি কি নিশ্চিতভাবে এই Mess Close করতে চান? ক্লোজ করলে হিসাব আর্কাইভ হয়ে যাবে এবং নতুন শুরু হবে।"
+"আপনি কি নিশ্চিতভাবে এই Mess Close করতে চান? ক্লোজ করলে সমস্ত মিল ও খরচ রিসেট হয়ে যাবে।"
 );
 
 if(!ok)
 return;
 
+// 1. Update mess status to closed
 const {error}=await db
 .from("messes")
 .update({
-
 status:"closed",
 closed_at:new Date().toISOString(),
 closed_by:user.id
-
 })
 .eq("id",mess.id);
 
 if(error)
 return msg(error.message);
 
+// 2. Delete/Reset all meals and expenses for this mess to clear dashboard calculations
+const memberIds = members.map(m => m.id);
+if(memberIds.length > 0) {
+await db.from("meals").delete().in("member_id", memberIds);
+await db.from("deposits").delete().in("member_id", memberIds);
+}
+await db.from("expenses").delete().eq("mess_id", mess.mess_id);
+
 mess.status="closed";
 
-msg(
-"Mess সফলভাবে Closed ও Archived হয়েছে।",
-true
-);
+msg("Mess সফলভাবে Closed ও হিসাব রিসেট হয়েছে।", true);
 
+await loadMess();
+
+}
+
+
+async function reopenMess(){
+
+if(member.role!=="admin") return msg("শুধু Admin নতুন মাস শুরু করতে পারবে।");
+
+const ok = confirm("আপনি কি নতুন মাসের জন্য মেস আবার একটিভ (Active) করতে চান?");
+if(!ok) return;
+
+const {error} = await db.from("messes").update({status: "active"}).eq("id", mess.id);
+if(error) return msg(error.message);
+
+mess.status = "active";
+msg("নতুন মাসের কার্যক্রম শুরু হয়েছে!", true);
 await loadMess();
 
 }
