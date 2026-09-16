@@ -1308,6 +1308,25 @@ Loading...
 </div>
 
 
+<!-- EDIT MEMBER MODAL -->
+<div id="editMemberModal" class="hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:grid;place-items:center;z-index:1000;">
+<div class="card" style="width:min(400px, 90%);background:#fff;">
+<h2>✏️ সদস্যের তথ্য এডিট করুন</h2>
+<input type="hidden" id="editMemberId">
+<label style="margin-top:10px">নাম</label>
+<input id="editMemberName" placeholder="নাম">
+<label style="margin-top:10px">পরিচয় / পদবি</label>
+<input id="editMemberIdentity" placeholder="পরিচয়">
+<label style="margin-top:10px">ফোন নম্বর</label>
+<input id="editMemberPhone" placeholder="ফোন">
+<div style="display:flex;gap:10px;margin-top:15px;">
+<button class="btn" style="flex:1;" onclick="updateMemberDetails()">Update</button>
+<button class="btn secondary" style="flex:1;" onclick="closeEditModal()">Cancel</button>
+</div>
+</div>
+</div>
+
+
 <script>
 
 const SUPABASE_URL =
@@ -1890,7 +1909,7 @@ ${escapeHtml(x.role||"member")}
 </span>
 
 ${
-admin && x.id !== member.id ? `
+admin ? `
 <select onchange="updateMemberRole('${x.id}', this.value)" style="padding:4px;font-size:11px">
 <option value="" disabled selected>Role</option>
 <option value="member">Member</option>
@@ -1898,7 +1917,9 @@ admin && x.id !== member.id ? `
 <option value="admin">Admin</option>
 </select>
 
-<button class="btn danger" style="padding:4px 8px;font-size:11px" onclick="removeMember('${x.id}')">Delete</button>
+<button class="btn blue" style="padding:4px 8px;font-size:11px" onclick="openEditModal('${x.id}', '${escapeHtml(x.name||'')}', '${escapeHtml(x.identity||'')}', '${escapeHtml(x.phone||'')}')">Edit</button>
+
+${x.id !== member.id ? `<button class="btn danger" style="padding:4px 8px;font-size:11px" onclick="removeMember('${x.id}')">Delete</button>` : ''}
 ` : ''
 }
 
@@ -1911,6 +1932,35 @@ admin && x.id !== member.id ? `
 `).join("")
 ||'<p class="muted">কোনো সদস্য নেই।</p>';
 
+}
+
+
+function openEditModal(id, name, identity, phone){
+$("editMemberId").value = id;
+$("editMemberName").value = name;
+$("editMemberIdentity").value = identity;
+$("editMemberPhone").value = phone;
+$("editMemberModal").classList.remove("hidden");
+}
+
+function closeEditModal(){
+$("editMemberModal").classList.add("hidden");
+}
+
+async function updateMemberDetails(){
+const id = $("editMemberId").value;
+const name = $("editMemberName").value.trim();
+const identity = $("editMemberIdentity").value.trim();
+const phone = $("editMemberPhone").value.trim();
+
+if(!name) return msg("সদস্যের নাম দিন।");
+
+const {error} = await db.from("members").update({name, identity, phone}).eq("id", id);
+if(error) return msg(error.message);
+
+msg("সদস্যের তথ্য আপডেট হয়েছে।", true);
+closeEditModal();
+await loadMembers();
 }
 
 
@@ -1928,6 +1978,7 @@ if(member.role!=="admin") return msg("শুধু Admin সদস্য ডি�
 const ok = confirm("আপনি কি নিশ্চিতভাবে এই সদস্যকে মেস থেকে ডিলিট করতে চান?");
 if(!ok) return;
 
+// ১. ডিলিটের সময় ফরেইন কি বা কনস্ট্রেইন্ট জঞ্জাল দূর করতে সংশ্লিষ্ট টেবিল ডাটা রিমোভ
 await db.from("meals").delete().eq("member_id", memberId);
 await db.from("deposits").delete().eq("member_id", memberId);
 
@@ -3038,7 +3089,7 @@ el.classList.add("active");
 
 window.scrollTo({
 top:0,
-behavior:"smooth"
+behavior:“smooth”
 });
 
 }
