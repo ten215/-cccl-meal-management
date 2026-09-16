@@ -1093,7 +1093,7 @@ onclick="window.print()">
 
 </div>
 
-<div class="grid3">
+<div class="grid4" style="margin-top:14px">
 
 <div class="stat">
 <span>Total Meal</span>
@@ -1108,6 +1108,11 @@ onclick="window.print()">
 <div class="stat">
 <span>Total Expense</span>
 <b id="rExpense">৳0</b>
+</div>
+
+<div class="stat" style="background:#0f172a;color:#fff;border:0;">
+<span style="color:#cbd5e1">Current Meal Rate</span>
+<b id="rMealRate" style="color:#38bdf8">৳0.00</b>
 </div>
 
 </div>
@@ -2337,6 +2342,7 @@ if(mess.status==="closed") {
 $("rMeals").textContent = "0";
 $("rDeposit").textContent = "৳0.00";
 $("rExpense").textContent = "৳0.00";
+$("rMealRate").textContent = "৳0.00";
 $("reportTable").innerHTML = '<tr><td colspan="5" class="muted">মেস ক্লোজড রয়েছে।</td></tr>';
 return;
 }
@@ -2364,6 +2370,9 @@ $("rDeposit").textContent=
 
 $("rExpense").textContent=
 "৳"+totalExpense.toFixed(2);
+
+$("rMealRate").textContent=
+"৳"+rate.toFixed(2);
 
 $("reportTable").innerHTML=
 members.map(m=>{
@@ -3034,39 +3043,4 @@ behavior:"smooth"
 
 function escapeHtml(s){
 
-return String(s??"")
-.replace(
-/[&<>"']/g,
-c=>({
-
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#039;"
-
-}[c])
-);
-
-}
-
-
-db.auth.onAuthStateChange(
-(event,session)=>{
-
-if(session&&!user){
-
-setTimeout(init,0);
-
-}
-
-}
-);
-
-
-init();
-
-</script>
-
-</body>
-</html>
+----
