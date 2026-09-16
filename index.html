@@ -1859,11 +1859,13 @@ ${escapeHtml(x.role||"member")}
 ${
 admin && x.id !== member.id ? `
 <select onchange="updateMemberRole('${x.id}', this.value)" style="padding:4px;font-size:11px">
-<option value="" disabled selected>Change Role</option>
+<option value="" disabled selected>Role</option>
 <option value="member">Member</option>
 <option value="manager">Manager</option>
 <option value="admin">Admin</option>
 </select>
+
+<button class="btn danger" style="padding:4px 8px;font-size:11px" onclick="removeMember('${x.id}')">Delete</button>
 ` : ''
 }
 
@@ -1884,6 +1886,19 @@ if(member.role!=="admin") return msg("শুধু Admin রোল পরিব�
 const {error} = await db.from("members").update({ role: newRole }).eq("id", memberId);
 if(error) return msg(error.message);
 msg("সদস্যের রোল আপডেট হয়েছে।", true);
+await loadMembers();
+}
+
+
+async function removeMember(memberId){
+if(member.role!=="admin") return msg("শুধু Admin সদস্য ডিলিট করতে পারবে।");
+const ok = confirm("আপনি কি নিশ্চিতভাবে এই সদস্যকে মেস থেকে ডিলিট করতে চান?");
+if(!ok) return;
+
+const {error} = await db.from("members").delete().eq("id", memberId);
+if(error) return msg(error.message);
+
+msg("সদস্য সফলভাবে ডিলিট হয়েছে।", true);
 await loadMembers();
 }
 
@@ -2121,7 +2136,6 @@ async function saveDeposit(){
 if(mess.status==="closed")
 return msg("এই Mess বন্ধ করা হয়েছে।");
 
-// Admin or Manager can add deposits or if self member deposit
 const memberId=$("depositMember").value;
 const amount=Number($("depositAmount").value||0);
 const date=$("depositDate").value;
@@ -2392,7 +2406,6 @@ ${new Date(x.created_at).toLocaleString("bn-BD")}
 `).join("")
 ||'<p class="muted">কোনো notice নেই।</p>';
 
-// Update live ticker with latest notice if available
 if(noticesData.length > 0){
 $("tickerContent").textContent = "📢 সর্বশেষ নোটিশ: " + noticesData[0].title + " - " + noticesData[0].message;
 }
@@ -2821,7 +2834,6 @@ const ok=confirm(
 if(!ok)
 return;
 
-// Update status to closed
 const {error}=await db
 .from("messes")
 .update({
@@ -2836,8 +2848,6 @@ closed_by:user.id
 if(error)
 return msg(error.message);
 
-// Automatically archive data or reset current entries by creating a new active mess or resetting status
-// To reset for a fresh cycle while archiving report:
 mess.status="closed";
 
 msg(
