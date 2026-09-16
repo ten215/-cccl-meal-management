@@ -1978,7 +1978,6 @@ if(member.role!=="admin") return msg("শুধু Admin সদস্য ডি�
 const ok = confirm("আপনি কি নিশ্চিতভাবে এই সদস্যকে মেস থেকে ডিলিট করতে চান?");
 if(!ok) return;
 
-// ১. ডিলিটের সময় ফরেইন কি বা কনস্ট্রেইন্ট জঞ্জাল দূর করতে সংশ্লিষ্ট টেবিল ডাটা রিমোভ
 await db.from("meals").delete().eq("member_id", memberId);
 await db.from("deposits").delete().eq("member_id", memberId);
 
@@ -3089,7 +3088,7 @@ el.classList.add("active");
 
 window.scrollTo({
 top:0,
-behavior:“smooth”
+behavior:"smooth"
 });
 
 }
