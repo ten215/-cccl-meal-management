@@ -1765,7 +1765,7 @@ $("messCode").textContent=mess.mess_code;
 if(mess.status==="closed"){
 
 $("messStatus").textContent="Closed / Archived";
-$("messStatus").className="badge closed";
+$("messStatus.className"]="badge closed";
 
 }else{
 
@@ -2068,13 +2068,6 @@ $("mealList").innerHTML = '<p class="muted">মেস ক্লোজড রয়�
 return;
 }
 
-const memberIds = members.map(m => m.id);
-if(memberIds.length === 0) {
-meals = [];
-return;
-}
-
-// ফিক্সড: সরাসরি মেম্বার আইডিগুলোর ইন ক্লজ ব্যবহার করে নির্ভুলভাবে সমস্ত মিল ফেচ করা
 const {data,error}=await db
 .from("meals")
 .select("*,members!inner(name, mess_id)")
@@ -2168,7 +2161,6 @@ return;
 
 const memberIds = members.map(m => m.id);
 
-// ফিক্সড: সরাসরি মেস আইডির মেম্বারদের ডিপোজিট ফেচ করা
 const {data:d}=memberIds.length > 0 ? await db
 .from("deposits")
 .select("*,members!inner(name, mess_id)")
@@ -2228,9 +2220,16 @@ ${x.note?" • "+escapeHtml(x.note):""}
 
 </div>
 
+<div style="display:flex;gap:8px;align-items:center;">
 <b>
 -৳${Number(x.amount||0).toFixed(2)}
 </b>
+${
+member.role==="admin" || member.role==="manager" ? `
+<button class="btn danger" style="padding:4px 8px;font-size:11px;" onclick="removeExpense('${x.id}')">Delete</button>
+` : ''
+}
+</div>
 
 </div>
 
@@ -2243,6 +2242,21 @@ $("moneyList").innerHTML=
 ].join("")
 ||'<p class="muted">কোনো transaction নেই।</p>';
 
+}
+
+
+async function removeExpense(expenseId){
+if(member.role!=="admin" && member.role!=="manager")
+return msg("খर्च ডিলিট করার অনুমতি শুধু Admin ও Mess Manager-এর আছে।");
+
+const ok = confirm("আপনি কি নিশ্চিতভাবে এই খরচটি ডিলিট করতে চান?");
+if(!ok) return;
+
+const {error} = await db.from("expenses").delete().eq("id", expenseId);
+if(error) return msg(error.message);
+
+msg("খরচ সফলভাবে ডিলিট হয়েছে।", true);
+await refreshAll();
 }
 
 
@@ -3008,7 +3022,6 @@ if(!ok)
 return;
 
 const totalMeals = meals.reduce((s,x)=>s+Number(x.meal||0),0);
-
 const totalDeposit = deposits.reduce((s,x)=>s+Number(x.amount||0),0);
 const totalExpense = expenses.reduce((s,x)=>s+Number(x.amount||0),0);
 const mealRate = totalMeals ? totalExpense / totalMeals : 0;
