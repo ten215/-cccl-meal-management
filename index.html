@@ -788,7 +788,7 @@ Notes
 Complaints
 </button>
 
-<button onclick="openSection('close',this)">
+<button onclick="openSection('close',this)" id="closeMessMenuBtn" class="hidden">
 <span class="menu-icon">🔒</span>
 Close Mess
 </button>
@@ -884,7 +884,7 @@ Deposit − Expense
 
 <section id="mealsSection" class="section">
 
-<div class="card">
+<div id="mealEntryCard" class="card hidden">
 
 <h2>
 🍚 Meal Entry
@@ -954,7 +954,7 @@ Save Meal
 
 <div class="grid">
 
-<div class="card">
+<div id="depositCard" class="card hidden">
 
 <h2>
 💰 Add Deposit
@@ -995,7 +995,7 @@ Save Deposit
 </div>
 
 
-<div class="card">
+<div id="expenseCard" class="card hidden">
 
 <h2>
 🧾 Add Expense
@@ -1780,6 +1780,21 @@ else if(member.role==="manager") roleBadge = `<span class="badge manager">MANAGE
 
 $("adminTopActions").innerHTML=roleBadge;
 
+// রোল চেক করে শুধু Admin ও Manager-দের জন্য এন্ট্রি ফর্ম ও ক্লোজ অপশন শো করা
+const isAdminOrManager = (member.role === "admin" || member.role === "manager");
+
+if(isAdminOrManager && mess.status !== "closed") {
+$("mealEntryCard").classList.remove("hidden");
+$("depositCard").classList.remove("hidden");
+$("expenseCard").classList.remove("hidden");
+$("closeMessMenuBtn").classList.remove("hidden");
+} else {
+$("mealEntryCard").classList.add("hidden");
+$("depositCard").classList.add("hidden");
+$("expenseCard").classList.add("hidden");
+$("closeMessMenuBtn").classList.add("hidden");
+}
+
 await refreshAll();
 
 }
@@ -1915,6 +1930,7 @@ admin ? `
 <option value="member">Member</option>
 <option value="manager">Manager</option>
 <option value="admin">Admin</option>
+<option value="viewer">Viewer</option>
 </select>
 
 <button class="btn blue" style="padding:4px 8px;font-size:11px" onclick="openEditModal('${x.id}', '${escapeHtml(x.name||'')}', '${escapeHtml(x.identity||'')}', '${escapeHtml(x.phone||'')}')">Edit</button>
@@ -2084,6 +2100,8 @@ return;
 
 meals=data||[];
 
+const isAdminOrManager = (member.role === "admin" || member.role === "manager");
+
 $("mealList").innerHTML=
 meals.map(x=>`
 
@@ -2101,9 +2119,16 @@ ${x.meal_date}
 
 </div>
 
+<div style="display:flex;gap:8px;align-items:center;">
 <b>
 ${Number(x.meal||0)}
 </b>
+${
+isAdminOrManager ? `
+<button class="btn danger" style="padding:4px 8px;font-size:11px;" onclick="removeMeal('${x.id}')">Delete</button>
+` : ''
+}
+</div>
 
 </div>
 
@@ -2113,7 +2138,25 @@ ${Number(x.meal||0)}
 }
 
 
+async function removeMeal(mealId){
+if(member.role !== "admin" && member.role !== "manager")
+return msg("মিল ডিলিট করার অনুমতি নেই।");
+
+const ok = confirm("এই মিলটি ডিলিট করতে চান?");
+if(!ok) return;
+
+const {error} = await db.from("meals").delete().eq("id", mealId);
+if(error) return msg(error.message);
+
+msg("মিল ডিলিট হয়েছে।", true);
+await refreshAll();
+}
+
+
 async function saveMeal(){
+
+if(member.role !== "admin" && member.role !== "manager")
+return msg("মিল এন্ট্রি করার অনুমতি শুধু Admin ও Manager-এর আছে।");
 
 if(mess.status==="closed")
 return msg("এই Mess বন্ধ করা হয়েছে।");
@@ -2178,6 +2221,8 @@ const {data:e}=await db
 deposits=d||[];
 expenses=e||[];
 
+const isAdminOrManager = (member.role === "admin" || member.role === "manager");
+
 const depositRows=deposits.map(x=>`
 
 <div class="row">
@@ -2195,9 +2240,16 @@ ${x.note?" • "+escapeHtml(x.note):""}
 
 </div>
 
+<div style="display:flex;gap:8px;align-items:center;">
 <b>
 +৳${Number(x.amount||0).toFixed(2)}
 </b>
+${
+isAdminOrManager ? `
+<button class="btn danger" style="padding:4px 8px;font-size:11px;" onclick="removeDeposit('${x.id}')">Delete</button>
+` : ''
+}
+</div>
 
 </div>
 
@@ -2225,7 +2277,7 @@ ${x.note?" • "+escapeHtml(x.note):""}
 -৳${Number(x.amount||0).toFixed(2)}
 </b>
 ${
-member.role==="admin" || member.role==="manager" ? `
+isAdminOrManager ? `
 <button class="btn danger" style="padding:4px 8px;font-size:11px;" onclick="removeExpense('${x.id}')">Delete</button>
 ` : ''
 }
@@ -2245,6 +2297,21 @@ $("moneyList").innerHTML=
 }
 
 
+async function removeDeposit(depositId){
+if(member.role !== "admin" && member.role !== "manager")
+return msg("ডিপোজিট ডিলিট করার অনুমতি নেই।");
+
+const ok = confirm("এই ডিপোজিট ডিলিট করতে চান?");
+if(!ok) return;
+
+const {error} = await db.from("deposits").delete().eq("id", depositId);
+if(error) return msg(error.message);
+
+msg("ডিপোজিট ডিলিট হয়েছে।", true);
+await refreshAll();
+}
+
+
 async function removeExpense(expenseId){
 if(member.role!=="admin" && member.role!=="manager")
 return msg("খরচ ডিলিট করার অনুমতি শুধু Admin ও Mess Manager-এর আছে।");
@@ -2261,6 +2328,9 @@ await refreshAll();
 
 
 async function saveDeposit(){
+
+if(member.role !== "admin" && member.role !== "manager")
+return msg("ডিপোজিট যোগ করার অনুমতি শুধু Admin ও Manager-এর আছে।");
 
 if(mess.status==="closed")
 return msg("এই Mess বন্ধ করা হয়েছে।");
