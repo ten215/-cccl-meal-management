@@ -1765,7 +1765,7 @@ $("messCode").textContent=mess.mess_code;
 if(mess.status==="closed"){
 
 $("messStatus").textContent="Closed / Archived";
-$("messStatus.className"]="badge closed";
+$("messStatus").className="badge closed";
 
 }else{
 
@@ -2247,7 +2247,7 @@ $("moneyList").innerHTML=
 
 async function removeExpense(expenseId){
 if(member.role!=="admin" && member.role!=="manager")
-return msg("খर्च ডিলিট করার অনুমতি শুধু Admin ও Mess Manager-এর আছে।");
+return msg("খরচ ডিলিট করার অনুমতি শুধু Admin ও Mess Manager-এর আছে।");
 
 const ok = confirm("আপনি কি নিশ্চিতভাবে এই খরচটি ডিলিট করতে চান?");
 if(!ok) return;
